@@ -49,8 +49,12 @@ mark{background:#ffe08a;border-radius:3px}
 .verd{font-size:12.5px;font-weight:600;white-space:nowrap}.verd.ok{color:var(--g)}.verd.no{color:var(--r)}
 .det{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:4px}
 .det .txt{max-height:none;font-size:13.5px}.lg{display:inline-flex;align-items:center;gap:5px;margin-right:12px}.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--line)}
-.vp{position:relative;height:78vh;min-height:480px;overflow:hidden;background:#eef1f5;border-radius:14px;cursor:grab;touch-action:none}.vp.grab{cursor:grabbing}
-#stage{position:absolute;left:0;top:0;transform-origin:0 0;width:2220px}
+#cmp:not([hidden]){position:fixed;inset:0;z-index:5;background:#eef1f5;display:flex;flex-direction:column}
+.dbar{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.08)}.dbar select{flex:1;min-width:0}
+.vp{position:relative;flex:1;overflow:hidden;cursor:grab;touch-action:none}.vp.grab{cursor:grabbing}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;width:2330px}
+.dq{background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:12px}.mrow{margin-bottom:16px}.mh{font-size:18px;font-weight:700;margin:0 0 6px 4px}
+.mcols{display:grid;grid-template-columns:repeat(7,320px);gap:10px}.col .pl{font-weight:800;font-size:16px}.hit.part{background:#fff6e0;box-shadow:inset 3px 0 0 #d9a400}.mcols .txt{max-height:none}
 .card{position:absolute;top:0;width:660px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .ch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:16px}
 .rows{position:relative}.crow{display:flex;align-items:center;gap:7px;height:44px;padding:0 8px;margin-bottom:6px;border-radius:9px;background:#f6f7f9;border-left:6px solid var(--c);cursor:pointer;font-size:13px}
@@ -146,49 +150,42 @@ function ranking(Em){ // order strategies for one model; ties (same chunk rank+c
  let pl=0,prev=null;for(const r of rows){const key=r.ev?r.ev[P.rank]+'|'+f3(r.ev[P.cos]):'none';if(key!==prev||!r.ev)pl++;prev=key;r.place=pl}
  return rows}
 function renderCmp(){
- $('#cmp').innerHTML=`<div class="panel deckbar"><div class="row" style="margin:0"><select id="cq">${Q.map(q=>`<option value="${q.id}">${q.id} [${q.split}] ${esc(q.question.slice(0,90))}</option>`).join('')}</select>
- <span class="zb"><button id="zo" title="Thu nhỏ">−</button><button id="zf">Vừa khung</button><button id="zi" title="Phóng to">+</button></span>
- <span class="small">Kéo để di chuyển · cuộn chuột (hoặc Ctrl/⌘ + cuộn) để phóng to/thu nhỏ · bấm một kỹ thuật để xem nó trên cả 3 model · hạng xếp theo vị trí của chunk chứa trọn bằng chứng trong toàn bộ index (kể cả ngoài top-3), cùng vị trí thì cos cao hơn đứng trước · đường nối cùng màu cho thấy hạng của một kỹ thuật đổi thế nào giữa các model</span></div>
- <div class="legend" style="margin-top:8px">${D.strategies.map(s=>`<span class="lg">${tag(s.key)} ${esc(s.name)}</span>`).join('')}</div></div>
- <div id="cqinfo"></div><div id="vp" class="vp"><div id="stage"></div></div>`;
+ $('#cmp').innerHTML=`<div class="dbar"><button class="mbtn" id="zx" title="Quay lại các tab">← Thoát</button>
+ <select id="cq">${Q.map(q=>`<option value="${q.id}">${q.id} [${q.split}] ${esc(q.question)}</option>`).join('')}</select>
+ <span class="zb"><button id="zo" title="Thu nhỏ">−</button><button id="zf">Vừa màn hình</button><button id="zi" title="Phóng to">+</button></span></div>
+ <div id="vp" class="vp"><div id="stage"></div></div>`;
  $('#cq').onchange=()=>showCmp($('#cq').value);
+ $('#zx').onclick=()=>document.querySelector('nav button[data-t=res]').click();
  $('#zi').onclick=()=>zoomAt(1.2);$('#zo').onclick=()=>zoomAt(1/1.2);$('#zf').onclick=fit;
  const vp=$('#vp');let drag=null;
- vp.addEventListener('pointerdown',e=>{if(e.target.closest('button,.crow,circle,.pt'))return;drag={x:e.clientX,y:e.clientY,vx:VIEW.x,vy:VIEW.y};vp.setPointerCapture(e.pointerId);vp.classList.add('grab')});
+ vp.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,vx:VIEW.x,vy:VIEW.y};vp.setPointerCapture(e.pointerId);vp.classList.add('grab')});
  vp.addEventListener('pointermove',e=>{if(!drag)return;VIEW.x=drag.vx+e.clientX-drag.x;VIEW.y=drag.vy+e.clientY-drag.y;apply()});
  vp.addEventListener('pointerup',()=>{drag=null;vp.classList.remove('grab')});
  vp.addEventListener('wheel',e=>{e.preventDefault();const r=vp.getBoundingClientRect();zoomAt(Math.exp(-e.deltaY*0.0015),e.clientX-r.left,e.clientY-r.top)},{passive:false});
- showCmp(Q[0].id);
+ CQ=Q[0];
 }
 function apply(){$('#stage').style.transform=`translate(${VIEW.x}px,${VIEW.y}px) scale(${VIEW.s})`}
 function zoomAt(f,cx,cy){const vp=$('#vp');cx??=vp.clientWidth/2;cy??=vp.clientHeight/2;const s=Math.min(3,Math.max(0.2,VIEW.s*f));VIEW.x=cx-(cx-VIEW.x)*s/VIEW.s;VIEW.y=cy-(cy-VIEW.y)*s/VIEW.s;VIEW.s=s;apply()}
 function fit(){const vp=$('#vp'),st=$('#stage');VIEW.s=Math.min(1,(vp.clientWidth-24)/st.offsetWidth);VIEW.x=(vp.clientWidth-st.offsetWidth*VIEW.s)/2;VIEW.y=12;apply()}
 async function showCmp(qid){
  CQ=Q.find(x=>x.id===qid);const E=await esq(qid);
- $('#cqinfo').innerHTML=`<div class="q"><b>${esc(CQ.question)}</b><div class="small" style="margin-top:4px">Bằng chứng: <b>${CQ.gold_source_id.startsWith('gdpr')?'GDPR':'AI Act'} trang ${CQ.gold_page}</b> — “${esc(CQ.evidence_quote)}”${CQ.filter?` · lọc <b>part = ${esc(CQ.filter.part)}</b> (chỉ C dùng lọc)`:''}</div></div>`;
- const R={};MK.forEach(m=>R[m]=ranking(E[m]));
- if(!SEL)SEL=R.bge[0].k;
- let h='';
- MK.forEach((m,i)=>{h+=`<div class="card" style="left:${i*780}px"><div class="ch"><b>${esc(mname(m))}</b><span class="small">${D.models.find(x=>x.key===m).dims} chiều</span></div><div class="rows">`+
-  R[m].map(r=>{const ev=r.ev;return `<div class="crow ${r.k===SEL?'sel':''}" data-k="${r.k}" style="--c:${COL[r.k]}"><span class="pl">${r.place}</span>${tag(r.k)}<span class="nm">${esc(sname(r.k))}</span>
-   <span class="hk ${r.h1?'ok':'no'}">@1 ${r.h1?'✓':'✗'}</span><span class="hk ${r.h3?'ok':'no'}">@3 ${r.h3?'✓':'✗'}</span>
-   <span class="evr">${ev?`bằng chứng ở #${ev[P.rank]} · cos ${f3(ev[P.cos])}`:'không chunk nào chứa trọn bằng chứng'}</span><button class="qm" data-k="${r.k}" data-m="${m}">?</button></div>`}).join('')+
-  `</div><div class="cdet" id="det_${m}"></div></div>`});
- $('#stage').innerHTML=h+'<svg id="links" class="links"></svg>';
- $('#stage').querySelectorAll('.crow').forEach(el=>el.onclick=e=>{if(e.target.closest('.qm'))return;SEL=el.dataset.k;showCmp(qid)});
- MK.forEach(m=>{$('#det_'+m).innerHTML=detail(qid,m,SEL,E,R,600)});
- // slope lines between models: same colour = same chunking technique
- const st=$('#stage'),W=st.offsetWidth,H=Math.max(...[...st.querySelectorAll('.card')].map(c=>c.offsetHeight)),svg=$('#links');st.style.height=H+'px';svg.setAttribute('width',W);svg.setAttribute('height',H);
- const pos=(m,k)=>{const el=st.querySelector(`#det_${m}`).parentElement.querySelector(`.crow[data-k="${k}"]`),card=el.closest('.card');return {y:card.offsetTop+el.offsetTop+el.offsetHeight/2,x0:card.offsetLeft,x1:card.offsetLeft+card.offsetWidth}};
- let s='';for(let i=0;i<2;i++)for(const k of Object.keys(COL)){const a=pos(MK[i],k),b=pos(MK[i+1],k);const on=k===SEL;
-  s+=`<path d="M${a.x1} ${a.y} C${a.x1+70} ${a.y},${b.x0-70} ${b.y},${b.x0} ${b.y}" stroke="${COL[k]}" stroke-width="${on?6:3}" fill="none" opacity="${on?1:.45}"/>`}
- svg.innerHTML=s;
+ let h=`<div class="dq"><b>${esc(CQ.question)}</b><div class="small">Bằng chứng: <b>${CQ.gold_source_id.startsWith('gdpr')?'GDPR':'AI Act'} trang ${CQ.gold_page}</b> — “${esc(CQ.evidence_quote)}”${CQ.filter?` · lọc <b>part = ${esc(CQ.filter.part)}</b> (chỉ C dùng lọc)`:''} · Mỗi hàng là một model; cột xếp theo hạng (vị trí chunk chứa trọn bằng chứng, cùng vị trí thì cos cao hơn trước). Viền xanh = chunk chứa trọn bằng chứng, viền vàng = đúng trang nhưng bị cắt.</div></div>`;
+ for(const m of MK){const R=ranking(E[m]);
+  h+=`<div class="mrow"><div class="mh">${esc(mname(m))} <span class="small">${D.models.find(x=>x.key===m).dims} chiều</span></div><div class="mcols">`;
+  for(const r of R){const t=(await traces(m,r.k))[qid];
+   h+=`<div class="col" style="border-top:6px solid ${COL[r.k]}"><h3><span><span class="pl">${r.place}</span> ${tag(r.k)} ${esc(sname(r.k))}<button class="qm" data-k="${r.k}" data-m="${m}">?</button></span>
+    <span><span class="hk ${r.h1?'ok':'no'}">@1 ${r.h1?'✓':'✗'}</span> <span class="hk ${r.h3?'ok':'no'}">@3 ${r.h3?'✓':'✗'}</span></span></h3>
+    <div class="small">${r.ev?`bằng chứng ở #${r.ev[P.rank]} · cos ${f3(r.ev[P.cos])}`:'không chunk nào chứa trọn bằng chứng'}</div>`;
+   for(const x of t.top3){const ok=String(x.is_hit)==='True',pt=E[m][r.k].pts.find(p=>p[P.rank]===+x.rank),part=!ok&&pt&&pt[P.st]===1;
+    h+=`<div class="hit ${ok?'ok':''} ${part?'part':''}"><div class="meta"><b>#${x.rank}</b><span>${pt?esc(locp(pt)):esc(x.document_id+' p'+x.page)}</span><span>cos ${f3(x.score)}</span></div><div class="txt">${snip(x.text)}</div></div>`}
+   h+='</div>'}
+  h+='</div></div>'}
+ $('#stage').innerHTML=h;
  if(!showCmp.done&&$('#vp').offsetWidth){showCmp.done=1;fit()}
 }
-function detail(qid,m,k,E,R,size){
- const I=info(E[m][k]);
- return `<div class="dh">${tag(k)} <b>${esc(sname(k))}</b> trên ${esc(mname(m))}</div>${plot(I,k,size)}<div class="why">${why(qid,m,k,E,R)}</div>
- <div class="tops">${I.top.map(p=>`<div class="tp ${p[P.st]===2?'ok':p[P.st]===1?'part':''}"><div class="meta"><b>#${p[P.rank]}</b><span>${esc(locp(p))}</span><span>cos ${f3(p[P.cos])} · d=1−cos ${f3(1-p[P.cos])} · L2 ${f3(l2(p[P.cos]))}</span><span>${p[P.len]} ký tự</span></div><div class="txt">${hl(p[P.txt])}</div></div>`).join('')}</div>`}
+function snip(text){const t=String(text),ev=CQ.evidence_quote;const i=t.toLowerCase().indexOf(ev.toLowerCase().slice(0,40));
+ if(i<0)return esc(t.length>420?t.slice(0,420)+' …':t);const a=Math.max(0,i-180),b=Math.min(t.length,i+ev.length+180);
+ return (a?'… ':'')+esc(t.slice(a,i))+'<mark>'+esc(t.slice(i,i+ev.length))+'</mark>'+esc(t.slice(i+ev.length,b))+(b<t.length?' …':'')}
 function hl(t){const e=CQ.evidence_quote.toLowerCase().slice(0,30);const i=t.toLowerCase().indexOf(e);return i<0?esc(t)+'…':esc(t.slice(0,i))+'<mark>'+esc(t.slice(i))+'</mark>…'}
 function plot(I,k,size){
  const W=size,H=size*0.8,cx=W/2,cy=H/2,R=Math.min(cx,cy)-30;
