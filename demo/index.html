@@ -70,7 +70,7 @@ mark{background:#ffe08a;border-radius:3px}
 .why p{font-size:13.5px;margin:6px 0}.mini{font-size:12.5px}.mini tr.me td{background:#f3f6fb;font-weight:600}
 .tp{border-radius:9px;padding:7px 9px;margin-top:6px;background:#f6f7f9;font-size:12.5px}.tp.ok{box-shadow:inset 3px 0 0 var(--g);background:var(--gb)}.tp.part{box-shadow:inset 3px 0 0 #d9a400;background:#fff6e0}
 .zb button,.mbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font:inherit;font-size:14px;cursor:pointer}.mbtn.on{background:var(--b);color:#fff;border-color:var(--b)}
-.box{max-width:820px}.box.wide{max-width:96vw}details.code{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:6px 0;background:#fafbfc}details.code summary{cursor:pointer;font-weight:600;font-size:14px}details.code pre{background:#1e2329;color:#e6e9ee;border-radius:8px;padding:10px;overflow:auto;max-height:420px;font-size:12px;line-height:1.45;margin:4px 0 8px}.ct2{font:12px ui-monospace,Menlo,monospace;color:var(--mut);margin-top:6px}.mgrid{display:grid;gap:16px}.mcell{min-width:0}.mcell+.mcell{border-left:1px solid var(--line);padding-left:16px}.mck{display:inline-flex;align-items:center;gap:4px;font-size:14px;cursor:pointer}
+.box{max-width:820px}.box.wide{max-width:96vw}.diff{background:#f5f8fc;border-radius:12px;padding:8px 14px;margin:8px 0 14px}.diff li{margin:5px 0;font-size:13.5px}details.code{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:6px 0;background:#fafbfc}details.code summary{cursor:pointer;font-weight:600;font-size:14px}details.code pre{background:#1e2329;color:#e6e9ee;border-radius:8px;padding:10px;overflow:auto;max-height:420px;font-size:12px;line-height:1.45;margin:4px 0 8px}.ct2{font:12px ui-monospace,Menlo,monospace;color:var(--mut);margin-top:6px}.mgrid{display:grid;gap:16px}.mcell{min-width:0}.mcell+.mcell{border-left:1px solid var(--line);padding-left:16px}.mck{display:inline-flex;align-items:center;gap:4px;font-size:14px;cursor:pointer}
 @media (max-width:900px){.mgrid{grid-template-columns:1fr!important}.mcell+.mcell{border-left:0;padding-left:0;border-top:1px solid var(--line)}}
 @media (max-width:700px){main,header{padding-left:16px;padding-right:16px}}
 </style></head>
@@ -264,6 +264,32 @@ async function codeBlocks(k,m){
  return box('Code chunking',`Cấu hình: <code>${esc(JSON.stringify(cfg))}</code>`,chunk)+
   box('Code embedding',`Model ${esc(mm.name||m)} · ${mm.dims||''} chiều · ${mode}. Vector chuẩn hoá L2 nên cosine = tích vô hướng.`,emb)+
   box('Code truy vấn','PostgreSQL + pgvector, tìm chính xác theo cosine (<code>&lt;=&gt;</code> là khoảng cách cosine), lọc trong SQL trước khi xếp hạng.',qry)}
+
+const MECH={F:'cắt cứng mỗi 500 ký tự, không nhìn câu hay Điều',A:'cắt mỗi 500 ký tự và lặp lại 50 ký tự cuối đoạn trước',D:'cắt theo đoạn → dòng → câu, tối đa 800 ký tự, lặp 80 ký tự',B:'cắt theo recital/Điều/khoản và gắn header tên Điều ở đầu chunk',S:'cắt ở chỗ hai câu liền kề ít giống nhau nhất, không có header',L:'để Haiku chọn ranh giới trên trang mẫu, trang khác cắt như D',C:'dùng chunk của B nhưng lọc theo phạm vi (part) trước khi xếp hạng'};
+function diffWhy(qid,m,ks,E,R){
+ const rows=ks.map(k=>({k,...R[m].find(r=>r.k===k)}));const best=rows[0];
+ const evLen=CQ.evidence_quote.length;
+ const startsMid=p=>{const t=p[P.txt].replace(/^\[[^\]]*\]\s*/,'');return /^[a-z,;.)]/.test(t)};
+ const tbl=`<table class="mini"><tr><th>Kỹ thuật</th><th>Hạng</th><th>@1</th><th>@3</th><th>Chunk bằng chứng ở</th><th>cos</th><th>Độ dài</th><th>Câu bằng chứng chiếm</th><th>Header</th><th>Mở đầu chunk</th><th>Chunk #1</th></tr>${rows.map(r=>{const e=r.ev,t1=r.top[0];
+  return `<tr><td>${tag(r.k)}</td><td>${r.place}</td><td>${r.h1?'✓':'✗'}</td><td>${r.h3?'✓':'✗'}</td><td>${e?'#'+e[P.rank]+'/'+r.n:'không có'}</td><td>${e?f3(e[P.cos]):'—'}</td><td>${e?e[P.len]:'—'}</td><td>${e?Math.round(100*evLen/e[P.len])+'%':'—'}</td><td>${e?(e[P.hdr]?'có':'không'):'—'}</td><td class="small">${e?esc(e[P.txt].slice(0,60))+'…'+(startsMid(e)?' <b>(giữa câu)</b>':''):'—'}</td><td class="small">${t1[P.st]===2?'chính là chunk bằng chứng':esc(locp(t1))+' · cos '+f3(t1[P.cos])}</td></tr>`}).join('')}</table>`;
+ const out=[];
+ for(const r of rows.slice(1)){const b=best,e=r.ev,be=b.ev,why=[];
+  if(r.place===b.place){out.push(`<li>${tag(r.k)} và ${tag(b.k)} chung hạng: hai cách cắt cho ra cùng một chunk bằng chứng (cùng cos ${be?f3(be[P.cos]):'—'}).</li>`);continue}
+  if(!e&&be){why.push(`${r.k} ${MECH[r.k]}, nên ranh giới rơi giữa câu bằng chứng và không chunk nào chứa trọn câu — trúng trang cũng bị tính trượt; ${b.k} ${MECH[b.k]}, nên câu nằm trọn trong một chunk`+(r.part?` (mảnh tốt nhất của ${r.k} đứng #${r.part[P.rank]})`:''))}
+  else if(e&&be){const d=be[P.cos]-e[P.cos];
+   if(Math.abs(d)<0.0005){why.push(`hai kỹ thuật có cùng chunk bằng chứng (cos ${f3(be[P.cos])}), nên chênh lệch không nằm ở chunk mà ở các chunk cạnh tranh: ${b.k} xếp nó #${be[P.rank]}/${b.n}, ${r.k} #${e[P.rank]}/${r.n}`+(b.k==='C'&&CQ.filter?`, vì C lọc part = ${CQ.filter.part} trước khi xếp hạng nên ${r.n-b.n} chunk sai phạm vi (trong đó có những chunk đứng trên ở ${r.k}) bị loại`:'')+(r.top[0][P.st]!==2?`; ở ${r.k}, chunk #1 là ${esc(locp(r.top[0]))} (cos ${f3(r.top[0][P.cos])})`:''));out.push(`<li><b>Vì sao ${tag(b.k)} hơn ${tag(r.k)}:</b> ${why.join('; ')}.</li>`);continue}
+   why.push(`chunk bằng chứng của ${b.k} gần câu hỏi hơn ${f3(d)} (cos ${f3(be[P.cos])} so với ${f3(e[P.cos])}), nên ${b.k} xếp nó #${be[P.rank]} còn ${r.k} chỉ #${e[P.rank]}`);
+   if(be[P.hdr]&&!e[P.hdr])why.push(`${b.k} có header "[${be[P.doc]} | … | ${esc(be[P.where])} …]" mang tên Điều/phần trùng từ khoá câu hỏi; chunk của ${r.k} không có`);
+   const sb=evLen/be[P.len],sr=evLen/e[P.len];
+   if(sr<sb*0.75)why.push(`chunk của ${r.k} dài ${e[P.len]} ký tự, câu bằng chứng chỉ chiếm ${Math.round(100*sr)}% (của ${b.k}: ${Math.round(100*sb)}%) nên phần nội dung khác kéo vector ra xa câu hỏi`);
+   if(startsMid(e)&&!startsMid(be))why.push(`chunk của ${r.k} bắt đầu giữa câu (do ${MECH[r.k]}), còn ${b.k} bắt đầu ở đầu một ý`);
+   const t1=r.top[0];if(t1[P.st]!==2)why.push(`ở ${r.k}, chunk #1 là ${esc(locp(t1))} (cos ${f3(t1[P.cos])})${t1[P.where]==='Recital'?': recital cùng chủ đề':''}${t1[P.st]===1?': mảnh chứa một phần bằng chứng':''}, chen lên trước chunk bằng chứng`);
+   if(r.k==='L')why.push(e[P.llm]?'trang bằng chứng nằm trong mẫu do Haiku cắt':'trang bằng chứng ngoài mẫu LLM nên L cắt giống D');
+   if(b.k==='C'&&CQ.filter)why.push(`ngoài ra C lọc part = ${CQ.filter.part} nên chỉ xếp hạng trong ${b.n} chunk (không lọc, chunk này đứng #${info(E[m].B).ev?info(E[m].B).ev[P.rank]:'—'})`);
+  }
+  else if(!e&&!be)why.push('cả hai đều không có chunk chứa trọn câu bằng chứng; thứ tự chỉ còn so mảnh chứa một phần');
+  out.push(`<li><b>Vì sao ${tag(b.k)} hơn ${tag(r.k)}:</b> ${why.join('; ')}.</li>`)}
+ return `<div class="diff"><h4>Vì sao kết quả khác nhau giữa các kỹ thuật đã chọn (${esc(mname(m))}, câu ${qid})</h4>${tbl}<ul>${out.join('')}</ul><div class="small">Cùng model, cùng câu hỏi: khác biệt chỉ đến từ cách cắt chunk, vì nó quyết định chunk chứa bằng chứng gồm những chữ nào, từ đó ra vector nào và cos bao nhiêu.</div></div>`}
 async function openQ(ks,m){
  const qid=$('#cq')?.value||Q[0].id;ks=[].concat(ks);m=m||'bge';CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
  const order=R[m].map(r=>r.k);ks.sort((a,b)=>order.indexOf(a)-order.indexOf(b));
@@ -273,6 +299,7 @@ async function openQ(ks,m){
  <div class="small" style="margin:6px 0">Câu ${qid}: ${esc(CQ.question)}</div>
  <div class="row msel" style="margin:0 0 8px"><span class="small">Chọn kỹ thuật để so sánh (xếp theo hạng trên câu này):</span>${R[m].map(r=>`<label class="mck"><input type="checkbox" value="${r.k}" ${ks.includes(r.k)?'checked':''}> ${r.place}. ${tag(r.k)} ${esc(sname(r.k))}</label>`).join('')}
  <button class="btn" id="mok">OK</button></div>
+ ${ks.length>1?diffWhy(qid,m,ks,E,R):''}
  <div class="mgrid" style="grid-template-columns:repeat(${ks.length},minmax(0,1fr))">${ks.map(k=>`<div class="mcell"><div class="mh">${tag(k)} ${esc(sname(k))}</div>
   <p class="small">${EXPLAIN[k].what} ${EXPLAIN[k].how}</p>
   <h4>Kết quả trên câu này</h4>${why(qid,m,k,E,R)}<p class="small">${bench(k)}</p><h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}<h4>Code</h4><div id="code_${k}" class="small">Đang tải code…</div></div>`).join('')}</div>`;
