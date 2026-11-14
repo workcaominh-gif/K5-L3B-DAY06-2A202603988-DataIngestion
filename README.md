@@ -45,7 +45,7 @@ python -m src.run llm              # Haiku chọn điểm cắt trên 30 trang m
 python -m src.run ingest           # 6 chunking × 3 model -> pgvector; nạp lại lần 2 để kiểm tra không nhân đôi
 python -m src.run eval             # top-3 cho 24 câu × 7 cấu hình × 3 model -> results/traces/<model>/
 python -m src.report               # results/summary.md + results/report_data.json
-python -m src.embspace             # results/embspace/<question>.json (embedding-space view in the demo)
+python -m src.embspace             # results/embspace/<question>.json (embedding space + chunk page map in the demo)
 python -m src.demo_server          # http://127.0.0.1:8770/demo/index.html
 ```
 

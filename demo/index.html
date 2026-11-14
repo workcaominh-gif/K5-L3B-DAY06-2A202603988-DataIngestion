@@ -54,6 +54,7 @@ mark{background:#ffe08a;border-radius:3px}
 .vp{position:relative;flex:1;overflow:hidden;cursor:grab;touch-action:none}.vp.grab{cursor:grabbing}
 #stage{position:absolute;left:0;top:0;transform-origin:0 0;width:2330px}
 .dq{background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:12px}.mrow{margin-bottom:16px}.mh{font-size:18px;font-weight:700;margin:0 0 6px 4px}
+.phwrap{background:#fff;border-radius:12px;padding:8px 12px;margin-bottom:10px;width:2330px}.pheat .hl{font-size:12px;fill:#59606a}.pheat .hk2{font-size:13px;font-weight:700;fill:#1d2321}.pheat .hn{font-size:10.5px;font-weight:700;fill:#fff;paint-order:stroke;stroke:#000;stroke-width:2px}
 .mcols{display:grid;grid-template-columns:repeat(7,320px);gap:10px}.col .pl{font-weight:800;font-size:16px}.hit.part{background:#fff6e0;box-shadow:inset 3px 0 0 #d9a400}.mcols .txt{max-height:none}
 .card{position:absolute;top:0;width:660px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .ch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:16px}
@@ -168,11 +169,29 @@ function renderCmp(){
 function apply(){$('#stage').style.transform=`translate(${VIEW.x}px,${VIEW.y}px) scale(${VIEW.s})`}
 function zoomAt(f,cx,cy){const vp=$('#vp');cx??=vp.clientWidth/2;cy??=vp.clientHeight/2;const s=Math.min(3,Math.max(0.2,VIEW.s*f));VIEW.x=cx-(cx-VIEW.x)*s/VIEW.s;VIEW.y=cy-(cy-VIEW.y)*s/VIEW.s;VIEW.s=s;apply()}
 function fit(){const vp=$('#vp'),st=$('#stage');VIEW.s=Math.min(1,(vp.clientWidth-24)/st.offsetWidth);VIEW.x=(vp.clientWidth-st.offsetWidth*VIEW.s)/2;VIEW.y=12;apply()}
+
+function heatCol(t){const st=[[255,247,214],[253,201,120],[240,128,60],[200,55,40],[120,20,30]];t=Math.max(0,Math.min(1,t))*(st.length-1);const i=Math.min(st.length-2,Math.floor(t)),f=t-i;return 'rgb('+st[i].map((v,j)=>Math.round(v+(st[i+1][j]-v)*f)).join(',')+')'}
+function pageHeat(m,R,E){
+ const PMp=E._pagemap;if(!PMp||!PMp.window.pages.length)return '';const w=PMp.window,W=2240,X0=70,L=w.len,sx=x=>X0+(W-X0)*x/L;
+ const all=[];for(const k in PMp.cos[m])PMp.cos[m][k].forEach((c,i)=>{if(PMp.chunks[k][i][3])all.push(c[0])});
+ const lo=Math.min(...all),hi=Math.max(...all);const BH=30,top=22;
+ let h=`<svg class="pheat" viewBox="0 0 ${W} ${top+R.length*(BH+6)+30}" width="${W}">`;
+ for(const pg of w.pages){h+=`<line x1="${sx(pg.start)}" y1="12" x2="${sx(pg.start)}" y2="${top+R.length*(BH+6)}" stroke="#9aa1a9" stroke-dasharray="3 3"/><text x="${sx(pg.start)+4}" y="14" class="hl">trang ${pg.page}${pg.page===CQ.gold_page?' (trang bằng chứng)':''}</text>`}
+ R.forEach((r,ri)=>{const y=top+ri*(BH+6),ch=PMp.chunks[r.k]||[],cs=PMp.cos[m][r.k]||[];
+  h+=`<text x="${X0-8}" y="${y+BH/2+4}" text-anchor="end" class="hk2">${r.place}. ${r.k}</text><rect x="${X0}" y="${y}" width="${W-X0}" height="${BH}" fill="#f1f3f5"/>`;
+  ch.forEach((c,i)=>{const [a,b,id,ok]=c,[cos,rk,stt]=cs[i];const lane=i%2,yy=y+lane*(BH/2),x=sx(a),wd=Math.max(2,sx(b)-sx(a));
+   const fill=ok?heatCol((cos-lo)/((hi-lo)||1)):'#d9dce0';
+   h+=`<rect x="${x}" y="${yy}" width="${wd}" height="${BH/2}" fill="${fill}" stroke="${stt===2?'#0f6b3a':stt===1?'#b07d00':'#fff'}" stroke-width="${stt?3:1}"><title>${r.k} · ${id}\n${ok?`cos ${f3(cos)} · hạng #${rk}`:'bị lọc (C chỉ xét part = '+(CQ.filter?CQ.filter.part:'')+')'}\n${b-a} ký tự${stt===2?'\nchứa trọn câu bằng chứng':stt===1?'\nchỉ chứa một phần câu bằng chứng (chunk cạnh: ranh giới cắt qua câu)':''}</title></rect>`;
+   if(ok&&rk&&rk<=3&&wd>14)h+=`<text x="${x+wd/2}" y="${yy+BH/2-4}" text-anchor="middle" class="hn">#${rk}</text>`})});
+ if(w.ev){const a=sx(w.ev[0]),b=sx(w.ev[1]);h+=`<rect x="${a}" y="${top-4}" width="${Math.max(3,b-a)}" height="${R.length*(BH+6)+2}" fill="rgba(31,95,168,.08)" stroke="#1f5fa8" stroke-width="2" stroke-dasharray="6 3"/><text x="${a}" y="${top+R.length*(BH+6)+14}" class="hl" fill="#1f5fa8">câu bằng chứng</text>`}
+ const gx=W-300;for(let i=0;i<=20;i++)h+=`<rect x="${gx+i*10}" y="${top+R.length*(BH+6)+6}" width="10" height="10" fill="${heatCol(i/20)}"/>`;
+ h+=`<text x="${gx-6}" y="${top+R.length*(BH+6)+15}" text-anchor="end" class="hl">cos ${f3(lo)}</text><text x="${gx+216}" y="${top+R.length*(BH+6)+15}" class="hl">${f3(hi)}</text></svg>`;
+ return `<div class="phwrap"><div class="small"><b>Bản đồ chunk trên trang bằng chứng ±1</b> · mỗi dải là một kỹ thuật (theo hạng), mỗi ô là một chunk đặt đúng vị trí trong văn bản, màu = cos với câu hỏi (càng đậm càng gần). Chunk xen kẽ hai làn để thấy chỗ chồng lấn (overlap). Viền xanh = chunk chứa trọn câu bằng chứng; viền vàng = chunk cạnh, ranh giới cắt qua câu bằng chứng; xám = bị lọc (C); khoảng trống = không định vị được (vd. phần header). Rê chuột vào ô để xem chi tiết.</div>${h}</div>`}
 async function showCmp(qid){
  CQ=Q.find(x=>x.id===qid);const E=await esq(qid);
  let h=`<div class="dq"><b>${esc(CQ.question)}</b><div class="small">Bằng chứng: <b>${CQ.gold_source_id.startsWith('gdpr')?'GDPR':'AI Act'} trang ${CQ.gold_page}</b> — “${esc(CQ.evidence_quote)}”${CQ.filter?` · lọc <b>part = ${esc(CQ.filter.part)}</b> (chỉ C dùng lọc)`:''} · Mỗi hàng là một model; cột xếp theo hạng (vị trí chunk chứa trọn bằng chứng, cùng vị trí thì cos cao hơn trước). Viền xanh = chunk chứa trọn bằng chứng, viền vàng = đúng trang nhưng bị cắt.</div></div>`;
  for(const m of MK){const R=ranking(E[m]);
-  h+=`<div class="mrow"><div class="mh">${esc(mname(m))} <span class="small">${D.models.find(x=>x.key===m).dims} chiều</span></div><div class="mcols">`;
+  h+=`<div class="mrow"><div class="mh">${esc(mname(m))} <span class="small">${D.models.find(x=>x.key===m).dims} chiều</span></div>${pageHeat(m,R,E)}<div class="mcols">`;
   for(const r of R){const t=(await traces(m,r.k))[qid];
    h+=`<div class="col" style="border-top:6px solid ${COL[r.k]}"><h3><span><span class="pl">${r.place}</span> ${tag(r.k)} ${esc(sname(r.k))}<button class="qm" data-k="${r.k}" data-m="${m}">?</button></span>
     <span><span class="hk ${r.h1?'ok':'no'}">@1 ${r.h1?'✓':'✗'}</span> <span class="hk ${r.h3?'ok':'no'}">@3 ${r.h3?'✓':'✗'}</span></span></h3>

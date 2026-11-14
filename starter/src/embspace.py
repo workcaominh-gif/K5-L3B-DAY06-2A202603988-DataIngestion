@@ -40,6 +40,44 @@ def _where(r: dict) -> str:
     return r["part"] or ""
 
 
+def _n(t: str) -> str:
+    return " ".join(t.split()).lower()
+
+
+def _body(text: str) -> str:
+    t = text.lstrip()
+    return t.split("]", 1)[1] if t.startswith("[") and "]" in t[:200] else t   # drop B's context header
+
+
+def _window(pages: dict, q: dict) -> dict:
+    """Gold page +-1 as one normalised string, with page offsets and the evidence span."""
+    doc, g = q["gold_source_id"], q["gold_page"]
+    segs, T, pos = [], "", 0
+    for pg in (g - 1, g, g + 1):
+        t = pages.get((doc, pg))
+        if t is None:
+            continue
+        t = _n(t)
+        segs.append({"page": pg, "start": len(T), "end": len(T) + len(t)})
+        T += t + " "
+    ev = _n(q["evidence_quote"])
+    i = T.find(ev)
+    if i < 0:
+        i = T.find(ev[:30])
+    return {"doc": doc, "pages": segs, "len": len(T), "ev": [i, i + len(ev)] if i >= 0 else None, "_T": T}
+
+
+def _locate(T: str, text: str) -> tuple[int, int] | None:
+    b = _n(_body(text))
+    if len(b) < 20:
+        return None
+    s = T.find(b[:60])
+    if s < 0:
+        return None
+    e = T.find(b[-60:], s)
+    return (s, e + 60) if e >= 0 else (s, s + len(b))
+
+
 def main() -> None:
     load_dotenv(ROOT / ".env")
     cfg = json.loads((REPO / "configs/strategies.json").read_text(encoding="utf-8"))
@@ -47,6 +85,10 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     llm_pages = set(json.loads((ROOT / "data/processed/llm_boundaries.json").read_text(encoding="utf-8"))["pages"])
     ALL: dict = {q["id"]: {} for q in qs}
+    pages = {(r["document_id"], r["page"]): r["text"] for r in
+             (json.loads(l) for l in (ROOT / "data/processed/pages.jsonl").read_text(encoding="utf-8").splitlines())}
+    WIN = {q["id"]: _window(pages, q) for q in qs}
+    PM: dict = {q["id"]: {"window": {k: v for k, v in WIN[q["id"]].items() if k != "_T"}, "chunks": {}, "cos": {}} for q in qs}
     for m in cfg["models"]:
         emb = MyEmbedder(m["name"])
         qv = {q["id"]: np.array(emb.embed_query(q["question"]), dtype=np.float32) for q in qs}
@@ -84,10 +126,30 @@ def main() -> None:
                                     " ".join(r["text"].split())[:220], len(r["text"]), llm,
                                     int(r["text"].lstrip().startswith("["))])
                     ALL[q["id"]].setdefault(m["key"], {})[label] = {"n": int(ok.sum()), "filter": flt, "pts": pts}
+                    # page map: every chunk overlapping the gold page +-1, its span on those pages and its cosine
+                    w, pm = WIN[q["id"]], PM[q["id"]]
+                    pgs = [x["page"] for x in w["pages"]]
+                    if label not in pm["chunks"]:
+                        spans = []
+                        for i, r in enumerate(rows):
+                            if r["document_id"] != w["doc"] or not pgs:
+                                continue
+                            if (r["page_end"] or r["page"]) < pgs[0] or r["page"] > pgs[-1]:
+                                continue
+                            loc = _locate(w["_T"], r["text"])
+                            if loc:
+                                spans.append((loc[0], loc[1], r["chunk_id"], bool(ok[i])))
+                        spans.sort()
+                        pm["chunks"][label] = [[a, b, c, int(o)] for a, b, c, o in spans]
+                    idx = {r["chunk_id"]: i for i, r in enumerate(rows)}
+                    pm["cos"].setdefault(m["key"], {})[label] = [
+                        [round(float(sims[idx[c]]), 4), int(rank[idx[c]]) if o else 0, 2 if idx[c] in hits else 1 if idx[c] in parts else 0]
+                        for _, _, c, o in pm["chunks"][label]]
                 print(m["key"], label, len(rows), "chunks")
     for f in OUT.glob("*.json"):
         f.unlink()
     for qid, d in ALL.items():
+        d["_pagemap"] = PM[qid]
         (OUT / f"{qid}.json").write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
