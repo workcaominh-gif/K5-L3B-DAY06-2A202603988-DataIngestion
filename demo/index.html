@@ -15,7 +15,7 @@ table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{padding:6px 8px
 td.num{text-align:center;font-variant-numeric:tabular-nums;border-radius:6px}
 .legend{font-size:12.5px;color:var(--mut);margin-top:8px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-select,input{font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+select,input{max-width:100%;font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
 input[type=text]{flex:1;min-width:260px}
 .btn{border:0;border-radius:8px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer;background:var(--b);color:#fff}
 .q{background:#eef4fd;border-radius:12px;padding:10px 14px;margin-bottom:12px}.q b{font-size:16px}
@@ -30,6 +30,25 @@ input[type=text]{flex:1;min-width:260px}
 mark{background:#ffe08a;border-radius:3px}
 .err{color:var(--r);font-size:13.5px}
 .small{font-size:12.5px;color:var(--mut)}
+.qm{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:0;background:#dfe7f3;color:var(--b);font:700 11.5px/1 inherit;cursor:pointer;margin-left:5px;vertical-align:1px}
+.qm:hover{background:var(--b);color:#fff}
+.pod{display:flex;flex-direction:column;gap:4px}
+.place{display:flex;align-items:center;gap:6px;font-size:13px}
+.medal{display:inline-flex;align-items:center;justify-content:center;min-width:44px;border-radius:6px;padding:1px 6px;font-size:11.5px;font-weight:700;color:#fff}
+.m1{background:#b8860b}.m2{background:#7d8590}.m3{background:#a0522d}
+.miss{font-size:11.5px;color:var(--mut)}
+.modal{position:fixed;inset:0;background:rgba(15,20,25,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.show{display:flex}.box{background:#fff;border-radius:14px;max-width:680px;width:100%;max-height:86vh;overflow:auto;padding:18px 20px}
+.box h3{margin:0 0 4px;font-size:18px}.box h4{margin:14px 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut)}
+.box p{margin:4px 0;font-size:14px}.box .close{float:right;border:0;background:#eef0f3;border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit}
+.ct td{vertical-align:middle}.ct tr.sel td{background:#f6f9fe}
+.pill{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 8px;font:inherit;font-size:12.5px;cursor:pointer;line-height:1.35}
+.pill b{font-size:12.5px}.pill .sc{color:var(--mut);font-size:11.5px}
+.pill.ok{background:var(--gb);border-color:var(--g)}.pill.part{background:#fff6e0;border-color:#d9a400}
+.pill.on{outline:2px solid var(--b);outline-offset:1px}
+.verd{font-size:12.5px;font-weight:600;white-space:nowrap}.verd.ok{color:var(--g)}.verd.no{color:var(--r)}
+.det{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:4px}
+.det .txt{max-height:none;font-size:13.5px}.lg{display:inline-flex;align-items:center;gap:5px;margin-right:12px}.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--line)}
 @media (max-width:700px){main,header{padding-left:16px;padding-right:16px}}
 </style></head>
 <body>
@@ -38,6 +57,7 @@ mark{background:#ffe08a;border-radius:3px}
  <div class="sub">Corpus: EU AI Act (bản Nghị viện thông qua 13/03/2024) + GDPR · 572 trang nội dung · PostgreSQL + pgvector · 24 câu benchmark (18 dev / 6 test)</div>
  <nav><button data-t="res" class="on">Kết quả</button><button data-t="cmp">So sánh câu hỏi</button><button data-t="live">Tìm thử</button></nav>
 </header>
+<div class="modal" id="modal"><div class="box" id="mbox"></div></div>
 <main>
  <section id="res"></section>
  <section id="cmp" hidden></section>
@@ -48,6 +68,25 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let D=null,Q=[],TR={};
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['res','cmp','live'].forEach(id=>$('#'+id).hidden=id!==b.dataset.t)});
+const EXPLAIN={
+ F:{what:'Cắt cố định (fixed-size), không chồng lấn.',how:'Mỗi trang PDF được cắt thành các đoạn liền nhau đúng 500 ký tự, không quan tâm câu, khoản hay Điều. Đoạn sau bắt đầu ngay chỗ đoạn trước kết thúc.',why:'Ranh giới rơi bất kỳ đâu, nên câu và cả chữ bị cắt đôi (coherence chấm tay 0,1/2). Câu trích bằng chứng nằm vắt qua ranh giới sẽ không có chunk nào chứa trọn, nên bị tính trượt (lỗi evidence_split). Metadata Điều lấy theo đầu trang nên sai với đoạn ở nửa dưới trang. Đây là baseline thấp nhất ở cả 3 model.'},
+ A:{what:'Cắt cố định + overlap 10%.',how:'Giống F (500 ký tự mỗi đoạn), nhưng mỗi đoạn lặp lại 50 ký tự cuối của đoạn trước, để câu nằm ở ranh giới vẫn có cơ hội xuất hiện trọn trong đoạn kế.',why:'Overlap cứu được một phần các câu bị cắt ở ranh giới, nên Hit@3 tăng so với F (bge dev 6→8) và số lỗi evidence_split giảm. Nhưng 50 ký tự là quá ngắn so với một khoản luật dài, và đoạn vẫn bắt đầu giữa chữ (coherence 0,1/2). Số chunk nhiều nhất (2283), đắt nhất khi lưu.'},
+ D:{what:'Cắt đệ quy (recursive).',how:'Thử cắt ở ranh giới lớn nhất trước (đoạn trống → xuống dòng → dấu chấm câu → khoảng trắng) cho tới khi mỗi mẩu ≤ 800 ký tự, rồi nối thêm 80 ký tự cuối của mẩu trước. Vẫn làm theo từng trang.',why:'Ranh giới thường trùng câu hoặc dòng nên chunk dài hơn, giữ trọn câu hơn A, Hit@3 cao hơn (Gemma dev 13/18). Nhưng phần overlap 80 ký tự được cắt máy móc nên chunk thường bắt đầu giữa chữ (coherence 0,8/2). Không biết cấu trúc Điều/khoản, nên vẫn gộp đuôi Điều này với đầu Điều khác.'},
+ B:{what:'Cắt theo cấu trúc văn bản (document structure).',how:'Đọc cả văn bản như một dòng chảy qua các trang, mở đơn vị mới ở mỗi recital "(12)", "Article N", khoản "1.", điểm phụ lục. Gộp các đơn vị nhỏ cùng một Điều tới ≤ 1200 ký tự, và gắn header như "[GDPR | Chapter III | Article 12 Transparent information…]" vào đầu chunk.',why:'Mỗi chunk là một ý pháp lý trọn vẹn, có tên Điều trong header, nên embedding "biết" chunk nói về gì. Kết quả: Hit@3 cao nhất khi không lọc (bge 13/18, Gemma 18/18), coherence 1,6/2, metadata đúng 18/18 vì cấu trúc được theo dõi từng dòng. Điểm yếu: recital và Điều nói cùng chủ đề nên đôi khi trả về recital thay vì Điều (q21 deep fake).'},
+ S:{what:'Cắt theo ngữ nghĩa (semantic).',how:'Tách câu, embed từng câu bằng bge-small, đo độ tương đồng giữa hai câu liền kề. Cắt ở những chỗ có độ tương đồng thấp nhất (10% thấp nhất trong cả văn bản), giới hạn 200–1200 ký tự.',why:'Ranh giới theo chủ đề nên chunk khá liền mạch (coherence 1,6/2, ngang B). Nhưng nó không biết tiêu đề Điều và không có header, nên có thể gộp hai Điều hoặc tách câu dẫn khỏi danh sách điểm. Với bge, Hit@3 chỉ ngang A (8/18); với Gemma tốt hơn nhiều (14/18), vì Gemma phân biệt nghĩa tốt hơn trên chunk không có header.'},
+ L:{what:'Cắt bằng LLM (agentic chunking).',how:'Claude Haiku 5.5 đọc từng trang với số dòng "[12] …" và trả về danh sách dòng bắt đầu ý mới (JSON, có schema), theo luật trong system prompt (giữ câu dẫn với danh sách điểm, giữ tiêu đề Điều với khoản 1). Chỉ chạy trên 30 trang mẫu (25 trang gold + 5 ngẫu nhiên) để tiết kiệm, khoảng $0,004 nhờ prompt caching. Các trang còn lại cắt bằng D.',why:'Trên trang có đáp án, chunk rất sạch nên Hit@1 cao (MiniLM dev 11/18, cao nhất), và thường đứng hạng 1–2 ở bảng xếp hạng. Nhưng kết quả này lạc quan: chỉ đúng các trang gold được LLM cắt, còn trang gây nhiễu giống D. Chưa biết nếu chạy cả corpus thì L còn giữ lợi thế không.'},
+ C:{what:'Cắt theo cấu trúc + lọc metadata.',how:'Dùng đúng index của B. Khi câu hỏi tự nêu phạm vi ("theo các recital", "trong phụ lục"), trang thêm điều kiện part = recital / annex vào câu SQL trước khi xếp hạng vector. Câu không nêu phạm vi thì chạy giống hệt B.',why:'Lọc loại bỏ các đoạn đúng chủ đề nhưng sai phạm vi. Ví dụ q19: không lọc thì ra recital (56); có lọc annex thì lấy đúng Phụ lục III. Với bge, dev Hit@3 13→14/18 và test 3→4/6; lọc được tuân thủ 4/4 câu. Với Gemma, B đã tốt nên lọc không thêm gì. Lọc chỉ giúp khi người dùng cho biết phạm vi trước.'}
+};
+const qm=k=>`<button class="qm" data-k="${k}" title="Kỹ thuật ${k} là gì?">?</button>`;
+function nums(k){if(!D)return '';return D.models.filter(m=>D.retrieval[m.key]).map(m=>{const x=D.retrieval[m.key][k]||{};const d=x.dev,t=x.test;return `<tr><td>${esc(m.name)}</td><td class="num">${d?d.hit1+'/'+d.n:'-'}</td><td class="num">${d?d.hit3+'/'+d.n:'-'}</td><td class="num">${t?t.hit3+'/'+t.n:'-'}</td></tr>`}).join('')}
+function openQ(k){const e=EXPLAIN[k],s=D.strategies.find(x=>x.key===k),M=D.manual_bge[k]||{};
+ $('#mbox').innerHTML=`<button class="close" onclick="document.getElementById('modal').classList.remove('show')">Đóng</button><h3>${k} · ${esc(s.name)}</h3><div class="small">${esc(JSON.stringify(s.config))}</div>
+ <h4>Là gì</h4><p>${e.what}</p><h4>Chạy thế nào</h4><p>${e.how}</p><h4>Vì sao ra kết quả hiện tại</h4><p>${e.why}</p>
+ <h4>Kết quả hiện tại</h4><table><tr><th>Model</th><th>Dev Hit@1</th><th>Dev Evidence Hit@3</th><th>Test Evidence Hit@3</th></tr>${nums(k)}</table>
+ <p class="small">Chấm tay (bge): coherence ${M.coherence_mean??'-'}/2 · metadata đủ & đúng ${M.metadata_ok}/${M.metadata_n} · grounding ${M.grounding_mean??'-'}/2.</p>`;
+ $('#modal').classList.add('show')}
+document.addEventListener('click',e=>{const b=e.target.closest('.qm');if(b){openQ(b.dataset.k)}else if(e.target.id==='modal'){$('#modal').classList.remove('show')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').classList.remove('show')});
 function heat(n,N){if(!N)return '';const p=n/N;return `background:rgba(31,107,74,${(0.08+p*0.55).toFixed(2)});${p>0.6?'color:#fff;':''}`}
 function cell(v,k){if(!v)return '<td class="num">-</td>';return `<td class="num" style="${heat(v[k],v.n)}">${v[k]}/${v.n}</td>`}
 async function load(){
@@ -57,14 +96,15 @@ async function load(){
 }
 function renderRes(){
  const S=D.strategies;let h='';
+
  for(const m of D.models){const r=D.retrieval[m.key];if(!r)continue;
   h+=`<div class="panel"><h2>${esc(m.name)} <span class="small">${m.dims} chiều</span></h2><table><tr><th>Chiến lược</th><th>Dev Hit@1</th><th>Dev Evidence Hit@3</th><th>Test Hit@1</th><th>Test Evidence Hit@3</th><th>Chunk</th></tr>`;
   for(const s of S){const x=r[s.key]||{};const ing=(D.ingest[m.key]?.strategies||{})[s.key==='C'?'B':s.key]||{};
-   h+=`<tr><td><b>${s.key}</b> · ${esc(s.name)}</td>${cell(x.dev,'hit1')}${cell(x.dev,'hit3')}${cell(x.test,'hit1')}${cell(x.test,'hit3')}<td class="num">${ing.chunks??'-'}</td></tr>`}
+   h+=`<tr><td><b>${s.key}</b> · ${esc(s.name)}${qm(s.key)}</td>${cell(x.dev,'hit1')}${cell(x.dev,'hit3')}${cell(x.test,'hit1')}${cell(x.test,'hit3')}<td class="num">${ing.chunks??'-'}</td></tr>`}
   h+='</table></div>'}
  const M=D.manual_bge;
  h+=`<div class="panel"><h2>Chấm tay (model bge-small)</h2><table><tr><th>Chiến lược</th><th>Coherence TB /2 (10 vị trí)</th><th>Metadata đủ & đúng (test top-3)</th><th>Grounding 0/1/2 (6 câu test)</th><th>Grounding TB /2</th></tr>`;
- for(const s of S){const x=M[s.key];h+=`<tr><td><b>${s.key}</b> · ${esc(s.name)}</td><td class="num" style="${heat(x.coherence_mean??0,2)}">${x.coherence_mean??'-'}</td><td class="num" style="${heat(x.metadata_ok,x.metadata_n)}">${x.metadata_ok}/${x.metadata_n}</td><td class="num">${(x.grounding_counts||[]).join(' / ')}</td><td class="num" style="${heat(x.grounding_mean??0,2)}">${x.grounding_mean??'-'}</td></tr>`}
+ for(const s of S){const x=M[s.key];h+=`<tr><td><b>${s.key}</b> · ${esc(s.name)}${qm(s.key)}</td><td class="num" style="${heat(x.coherence_mean??0,2)}">${x.coherence_mean??'-'}</td><td class="num" style="${heat(x.metadata_ok,x.metadata_n)}">${x.metadata_ok}/${x.metadata_n}</td><td class="num">${(x.grounding_counts||[]).join(' / ')}</td><td class="num" style="${heat(x.grounding_mean??0,2)}">${x.grounding_mean??'-'}</td></tr>`}
  h+=`</table><div class="legend">Nhãn chấm tay do Claude (trợ lý AI) gán theo thang của đề và học viên rà lại; có nguy cơ thiên lệch phía tác giả. File: starter/results/manual/*.csv.</div></div>`;
  const L=D.llm_chunking||{};
  h+=`<div class="panel"><h2>Chi phí LLM chunking (L)</h2><div class="small">Model ${esc(L.model)} · ${L.pages} trang mẫu · token vào ${L.tokens?.input}, đọc từ cache ${L.tokens?.cache_read}, ra ${L.tokens?.output} · ước tính $${L.cost_usd_estimate}. Các trang ngoài mẫu dùng chunk đệ quy D.</div></div>`;
@@ -77,12 +117,26 @@ function renderCmp(){
  <select id="cm">${D.models.filter(m=>D.retrieval[m.key]).map(m=>`<option value="${m.key}">${esc(m.name)}</option>`).join('')}</select></div><div id="cbody"></div></div>`;
  $('#cq').onchange=$('#cm').onchange=showCmp;showCmp();
 }
+const onGold=(x,q)=>x.document_id===q.gold_source_id&&+x.page<=q.gold_page&&q.gold_page<=+(x.page_end||x.page);
+function kind(x,q){return x.is_hit?'ok':onGold(x,q)?'part':''}
+function loc(x){const doc=x.document_id.startsWith('gdpr')?'GDPR':'AI Act';const pg=x.page_end&&x.page_end!==x.page?x.page+'–'+x.page_end:x.page;
+ const where=x.part==='recital'?'Recital':x.annex&&x.annex!=='None'?'Phụ lục '+x.annex:x.article&&x.article!=='None'?'Điều '+x.article:(x.part||'');return `${doc} · tr.${pg}${where?' · '+where:''}`}
+function snippet(text,ev){const t=String(text);const i=t.toLowerCase().indexOf(String(ev).toLowerCase().slice(0,40));
+ if(i<0)return {html:esc(t.length>700?t.slice(0,700)+' …':t),found:false};
+ const a=Math.max(0,i-220),b=Math.min(t.length,i+ev.length+220);
+ return {html:(a?'… ':'')+esc(t.slice(a,i))+'<mark>'+esc(t.slice(i,i+ev.length))+'</mark>'+esc(t.slice(i+ev.length,b))+(b<t.length?' …':''),found:true}}
 async function showCmp(){
  const q=Q.find(x=>x.id===$('#cq').value),m=$('#cm').value;
- let h=`<div class="q"><b>${esc(q.question)}</b><div class="small">Gold: ${q.gold_source_id} trang ${q.gold_page}${q.filter?` · lọc ${esc(JSON.stringify(q.filter))} (chỉ áp dụng ở C)`:''} · Đáp án: ${esc(q.expected_answer)}</div></div><div class="grid">`;
- for(const s of D.strategies){const t=(await traces(m,s.key))[q.id];
-  h+=`<div class="col"><h3><span>${s.key} · ${esc(s.name)}</span><span class="chip ${t.hit_at_3?'ok':'no'}">${t.hit_at_3?'Hit@3':'trượt'}</span></h3>`;
-  for(const x of t.top3)h+=`<div class="hit ${x.is_hit?'ok':''}"><div class="meta"><span>#${x.rank}</span><span>${x.document_id} p${x.page}${x.page_end&&x.page_end!==x.page?'–'+x.page_end:''}</span><span>${x.part||''}${x.article?' · Art. '+x.article:''}${x.annex?' · Annex '+x.annex:''}</span><span>score ${x.score}</span></div><div class="txt">${mark(x.text,q.evidence_quote)}</div></div>`;
+ const rows=[];for(const s of D.strategies){const t=(await traces(m,s.key))[q.id];rows.push({s,t,h:t.top3.find(x=>x.is_hit)})}
+ rows.sort((a,b)=>(a.h?+a.h.rank:9)-(b.h?+b.h.rank:9)||(b.h?+b.h.score:0)-(a.h?+a.h.score:0));
+ let place=0,prev=null;
+ for(const r of rows){if(!r.h){r.place=null;continue}const key=r.h.rank+'|'+(+r.h.score).toFixed(4);if(key!==prev)place++;prev=key;r.place=place}
+ let h=`<div class="q"><b>${esc(q.question)}</b><div class="small" style="margin-top:4px">Bằng chứng: <b>${q.gold_source_id.startsWith('gdpr')?'GDPR':'AI Act'} trang ${q.gold_page}</b> — “${esc(q.evidence_quote)}”${q.filter?` · lọc <b>part = ${esc(q.filter.part)}</b> (chỉ C dùng lọc)`:''}</div></div>
+ <div class="small" style="margin-bottom:8px">Cột xếp theo hạng trên câu này với model này: kỹ thuật lấy được chunk chứa trọn bằng chứng ở vị trí cao hơn trong top-3 đứng trước; cùng vị trí thì điểm tương đồng cao hơn đứng trước; trả về cùng chunk thì chung hạng. Ô viền xanh = chunk chứa trọn câu bằng chứng; ô viền vàng = đúng trang nhưng câu bằng chứng bị cắt.</div><div class="grid">`;
+ for(const r of rows){const {s,t}=r;
+  const badge=r.place?`<span class="medal m${Math.min(r.place,3)}" ${r.place>3?'style="background:#9aa3ad"':''}>Hạng ${r.place}</span>`:`<span class="chip no">Trượt</span>`;
+  h+=`<div class="col"><h3><span>${badge} ${s.key} · ${esc(s.name)}${qm(s.key)}</span><span class="small">${r.h?'trúng ở #'+r.h.rank+' · '+(+r.h.score).toFixed(3):''}</span></h3>`;
+  for(const x of t.top3){const k=kind(x,q);h+=`<div class="hit ${k==='ok'?'ok':''}" ${k==='part'?'style="background:#fff6e0;box-shadow:inset 3px 0 0 #d9a400"':''}><div class="meta"><span>#${x.rank}</span><span>${esc(loc(x))}</span><span>điểm ${(+x.score).toFixed(3)}</span></div><div class="txt">${snippet(x.text,q.evidence_quote).html}</div></div>`}
   h+='</div>'}
  $('#cbody').innerHTML=h+'</div>';
 }

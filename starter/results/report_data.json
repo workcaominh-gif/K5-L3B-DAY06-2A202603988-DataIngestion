@@ -1,4 +1,513 @@
 {
+ "podium": {
+  "bge": {
+   "q04": {
+    "places": [
+     {
+      "strategies": [
+       "B",
+       "C"
+      ],
+      "rank": 1,
+      "score": 0.7227
+     },
+     {
+      "strategies": [
+       "D"
+      ],
+      "rank": 1,
+      "score": 0.7171
+     },
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 1,
+      "score": 0.7113
+     }
+    ],
+    "hits": 5,
+    "missed": [
+     "F",
+     "S"
+    ]
+   },
+   "q09": {
+    "places": [
+     {
+      "strategies": [
+       "S"
+      ],
+      "rank": 1,
+      "score": 0.7852
+     },
+     {
+      "strategies": [
+       "D"
+      ],
+      "rank": 2,
+      "score": 0.7829
+     },
+     {
+      "strategies": [
+       "A"
+      ],
+      "rank": 2,
+      "score": 0.7824
+     }
+    ],
+    "hits": 5,
+    "missed": [
+     "F",
+     "L"
+    ]
+   },
+   "q14": {
+    "places": [
+     {
+      "strategies": [
+       "B",
+       "C"
+      ],
+      "rank": 1,
+      "score": 0.8206
+     },
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 1,
+      "score": 0.8072
+     },
+     {
+      "strategies": [
+       "F",
+       "A"
+      ],
+      "rank": 1,
+      "score": 0.7901
+     }
+    ],
+    "hits": 7,
+    "missed": []
+   },
+   "q19": {
+    "places": [
+     {
+      "strategies": [
+       "C"
+      ],
+      "rank": 2,
+      "score": 0.712
+     }
+    ],
+    "hits": 1,
+    "missed": [
+     "F",
+     "A",
+     "D",
+     "B",
+     "S",
+     "L"
+    ]
+   },
+   "q21": {
+    "places": [
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 2,
+      "score": 0.71
+     },
+     {
+      "strategies": [
+       "A"
+      ],
+      "rank": 2,
+      "score": 0.6928
+     },
+     {
+      "strategies": [
+       "D"
+      ],
+      "rank": 2,
+      "score": 0.6796
+     }
+    ],
+    "hits": 5,
+    "missed": [
+     "B",
+     "C"
+    ]
+   },
+   "q23": {
+    "places": [],
+    "hits": 0,
+    "missed": [
+     "F",
+     "A",
+     "D",
+     "B",
+     "S",
+     "L",
+     "C"
+    ]
+   }
+  },
+  "minilm": {
+   "q04": {
+    "places": [
+     {
+      "strategies": [
+       "B",
+       "C"
+      ],
+      "rank": 1,
+      "score": 0.5623
+     },
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 1,
+      "score": 0.5326
+     },
+     {
+      "strategies": [
+       "D"
+      ],
+      "rank": 1,
+      "score": 0.5223
+     }
+    ],
+    "hits": 6,
+    "missed": [
+     "F"
+    ]
+   },
+   "q09": {
+    "places": [
+     {
+      "strategies": [
+       "B",
+       "C"
+      ],
+      "rank": 1,
+      "score": 0.7026
+     },
+     {
+      "strategies": [
+       "S"
+      ],
+      "rank": 2,
+      "score": 0.6762
+     }
+    ],
+    "hits": 3,
+    "missed": [
+     "F",
+     "A",
+     "D",
+     "L"
+    ]
+   },
+   "q14": {
+    "places": [
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 2,
+      "score": 0.6819
+     },
+     {
+      "strategies": [
+       "S"
+      ],
+      "rank": 2,
+      "score": 0.6634
+     },
+     {
+      "strategies": [
+       "D"
+      ],
+      "rank": 3,
+      "score": 0.6661
+     }
+    ],
+    "hits": 3,
+    "missed": [
+     "F",
+     "A",
+     "B",
+     "C"
+    ]
+   },
+   "q19": {
+    "places": [
+     {
+      "strategies": [
+       "C"
+      ],
+      "rank": 1,
+      "score": 0.5869
+     }
+    ],
+    "hits": 1,
+    "missed": [
+     "F",
+     "A",
+     "D",
+     "B",
+     "S",
+     "L"
+    ]
+   },
+   "q21": {
+    "places": [
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 3,
+      "score": 0.552
+     }
+    ],
+    "hits": 1,
+    "missed": [
+     "F",
+     "A",
+     "D",
+     "B",
+     "S",
+     "C"
+    ]
+   },
+   "q23": {
+    "places": [],
+    "hits": 0,
+    "missed": [
+     "F",
+     "A",
+     "D",
+     "B",
+     "S",
+     "L",
+     "C"
+    ]
+   }
+  },
+  "gemma": {
+   "q04": {
+    "places": [
+     {
+      "strategies": [
+       "A"
+      ],
+      "rank": 1,
+      "score": 0.5855
+     },
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 1,
+      "score": 0.5752
+     },
+     {
+      "strategies": [
+       "D"
+      ],
+      "rank": 1,
+      "score": 0.5735
+     }
+    ],
+    "hits": 6,
+    "missed": [
+     "F"
+    ]
+   },
+   "q09": {
+    "places": [
+     {
+      "strategies": [
+       "B",
+       "C"
+      ],
+      "rank": 1,
+      "score": 0.6203
+     },
+     {
+      "strategies": [
+       "D"
+      ],
+      "rank": 1,
+      "score": 0.5926
+     },
+     {
+      "strategies": [
+       "A"
+      ],
+      "rank": 2,
+      "score": 0.586
+     }
+    ],
+    "hits": 5,
+    "missed": [
+     "F",
+     "L"
+    ]
+   },
+   "q14": {
+    "places": [
+     {
+      "strategies": [
+       "B",
+       "C"
+      ],
+      "rank": 2,
+      "score": 0.6487
+     },
+     {
+      "strategies": [
+       "S"
+      ],
+      "rank": 2,
+      "score": 0.6167
+     },
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 2,
+      "score": 0.6116
+     }
+    ],
+    "hits": 7,
+    "missed": []
+   },
+   "q19": {
+    "places": [],
+    "hits": 0,
+    "missed": [
+     "F",
+     "A",
+     "D",
+     "B",
+     "S",
+     "L",
+     "C"
+    ]
+   },
+   "q21": {
+    "places": [
+     {
+      "strategies": [
+       "L"
+      ],
+      "rank": 1,
+      "score": 0.6311
+     },
+     {
+      "strategies": [
+       "F",
+       "A"
+      ],
+      "rank": 1,
+      "score": 0.621
+     },
+     {
+      "strategies": [
+       "S"
+      ],
+      "rank": 2,
+      "score": 0.6128
+     }
+    ],
+    "hits": 7,
+    "missed": []
+   },
+   "q23": {
+    "places": [],
+    "hits": 0,
+    "missed": [
+     "F",
+     "A",
+     "D",
+     "B",
+     "S",
+     "L",
+     "C"
+    ]
+   }
+  }
+ },
+ "test_questions": [
+  {
+   "id": "q04",
+   "split": "test",
+   "type": "paraphrase",
+   "question": "If I send a company a request about my personal data, how long do they have to tell me what they did, and can they take longer?",
+   "expected_answer": "Within one month of receipt; extendable by two further months where necessary given complexity and number of requests.",
+   "gold_source_id": "gdpr-2016",
+   "gold_page": 56,
+   "evidence_quote": "within one month of receipt of the request. That period may be extended by two further months where necessary"
+  },
+  {
+   "id": "q09",
+   "split": "test",
+   "type": "condition",
+   "question": "When must a public body appoint a data protection officer, and are courts treated differently?",
+   "expected_answer": "Whenever processing is carried out by a public authority or body, except courts acting in their judicial capacity.",
+   "gold_source_id": "gdpr-2016",
+   "gold_page": 75,
+   "evidence_quote": "the processing is carried out by a public authority or body, except for courts acting in their judicial capacity"
+  },
+  {
+   "id": "q14",
+   "split": "test",
+   "type": "direct",
+   "question": "How does the AI Act define an AI system?",
+   "expected_answer": "A machine-based system designed to operate with varying levels of autonomy, that may exhibit adaptiveness after deployment and infers from input how to generate outputs.",
+   "gold_source_id": "eu-ai-act-2024",
+   "gold_page": 166,
+   "evidence_quote": "'AI system' means a machine-based system designed to operate with varying levels of autonomy"
+  },
+  {
+   "id": "q19",
+   "split": "test",
+   "type": "filter",
+   "question": "Within the annexes, which AI uses in education are listed as high-risk?",
+   "expected_answer": "AI systems used to determine access or admission or assign people to education and vocational training institutions (and to evaluate learning outcomes, among others).",
+   "gold_source_id": "eu-ai-act-2024",
+   "gold_page": 425,
+   "evidence_quote": "AI systems intended to be used to determine access or admission or to assign natural persons to educational and vocational training institutions at all levels",
+   "filter": {
+    "part": "annex"
+   }
+  },
+  {
+   "id": "q21",
+   "split": "test",
+   "type": "exception",
+   "question": "Is there an exception to the rule that people must be told when content is a deep fake?",
+   "expected_answer": "Yes, the disclosure obligation does not apply where the use is authorised by law to detect, prevent, investigate or prosecute criminal offences.",
+   "gold_source_id": "eu-ai-act-2024",
+   "gold_page": 284,
+   "evidence_quote": "This obligation shall not apply where the use is authorised by law to detect, prevent, investigate or prosecute criminal offence"
+  },
+  {
+   "id": "q23",
+   "split": "test",
+   "type": "version",
+   "question": "From when does the AI Act apply according to this adopted Parliament text?",
+   "expected_answer": "The text gives no calendar date: it applies from 24 months after entry into force (placeholder '… [24 months from the date of entry into force]').",
+   "gold_source_id": "eu-ai-act-2024",
+   "gold_page": 416,
+   "evidence_quote": "It shall apply from … [24 months from the date of entry into force of this Regulation]"
+  }
+ ],
  "strategies": [
   {
    "key": "F",

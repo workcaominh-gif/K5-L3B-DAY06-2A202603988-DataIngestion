@@ -52,7 +52,34 @@ def build() -> dict:
                    "metadata_ok": meta[st][0], "metadata_n": meta[st][1]} for st in ORDER}
     manual["C"]["coherence_mean"] = manual["B"]["coherence_mean"]   # same chunks as B
     manual["C"]["coherence_n"] = manual["B"]["coherence_n"]
-    return {"strategies": [{"key": k, "name": NAMES[k], "config": cfg.get(k, {})} for k in ORDER],
+    podium = {}
+    qs = [json.loads(l) for l in (REPO / "benchmark/questions.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    test_ids = [q["id"] for q in qs if q["split"] == "test"]
+    for mk in summary:
+        podium[mk] = {}
+        tr = {}
+        for st in ORDER:
+            f = RES / "traces" / mk / f"traces_{st}.jsonl"
+            tr[st] = {json.loads(l)["id"]: json.loads(l) for l in f.read_text(encoding="utf-8").splitlines()}
+        for qid in test_ids:
+            entries = []
+            for st in ORDER:
+                t = tr[st][qid]
+                hit = next((x for x in t["top3"] if x["is_hit"]), None)
+                if hit:
+                    entries.append({"strategy": st, "rank": hit["rank"], "score": hit["score"], "chunk_id": hit["chunk_id"]})
+            entries.sort(key=lambda e: (e["rank"], -e["score"]))
+            places, prev = [], None                      # group exact ties (C == B when no filter applies)
+            for e in entries:
+                key = (e["rank"], round(e["score"], 4))
+                if prev == key:
+                    places[-1]["strategies"].append(e["strategy"])
+                else:
+                    places.append({"strategies": [e["strategy"]], "rank": e["rank"], "score": e["score"]})
+                prev = key
+            podium[mk][qid] = {"places": places[:3], "hits": len(entries), "missed": [st for st in ORDER if st not in {e["strategy"] for e in entries}]}
+    return {"podium": podium, "test_questions": [q for q in qs if q["split"] == "test"],
+            "strategies": [{"key": k, "name": NAMES[k], "config": cfg.get(k, {})} for k in ORDER],
             "models": cfg["models"], "retrieval": retrieval, "chunk_stats": ingest.get("chunk_stats", {}),
             "ingest": {k: v for k, v in ingest.get("models", {}).items()}, "manual_bge": manual, "llm_chunking": llm}
 
