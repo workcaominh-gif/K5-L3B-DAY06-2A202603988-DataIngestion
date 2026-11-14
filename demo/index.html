@@ -70,7 +70,8 @@ mark{background:#ffe08a;border-radius:3px}
 .why p{font-size:13.5px;margin:6px 0}.mini{font-size:12.5px}.mini tr.me td{background:#f3f6fb;font-weight:600}
 .tp{border-radius:9px;padding:7px 9px;margin-top:6px;background:#f6f7f9;font-size:12.5px}.tp.ok{box-shadow:inset 3px 0 0 var(--g);background:var(--gb)}.tp.part{box-shadow:inset 3px 0 0 #d9a400;background:#fff6e0}
 .zb button,.mbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font:inherit;font-size:14px;cursor:pointer}.mbtn.on{background:var(--b);color:#fff;border-color:var(--b)}
-.box{max-width:820px}
+.box{max-width:820px}.box.wide{max-width:96vw}.mgrid{display:grid;gap:16px}.mcell{min-width:0}.mcell+.mcell{border-left:1px solid var(--line);padding-left:16px}.mck{display:inline-flex;align-items:center;gap:4px;font-size:14px;cursor:pointer}
+@media (max-width:900px){.mgrid{grid-template-columns:1fr!important}.mcell+.mcell{border-left:0;padding-left:0;border-top:1px solid var(--line)}}
 @media (max-width:700px){main,header{padding-left:16px;padding-right:16px}}
 </style></head>
 <body>
@@ -236,16 +237,19 @@ function why(qid,m,k,E,R){
  // vs other models, same technique
  out.push(`<p><b>Cùng kỹ thuật ${k} trên model khác:</b> ${MK.map(mm=>{const x=R[mm].find(y=>y.k===k);return `${esc(mname(mm))}: hạng ${x.place}, ${x.ev?'bằng chứng #'+x.ev[P.rank]+' (cos '+f3(x.ev[P.cos])+')':'không có chunk chứa trọn'}`}).join(' · ')}.</p>`);
  return out.join('')}
-async function openQ(k,m){
- const qid=$('#cq')?.value||Q[0].id;m=m||'bge';CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
+async function openQ(k,ms){
+ const qid=$('#cq')?.value||Q[0].id;ms=[].concat(ms||'bge');CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
  const e=EXPLAIN[k],s=D.strategies.find(x=>x.key===k);
+ $('#mbox').classList.toggle('wide',ms.length>1);
  $('#mbox').innerHTML=`<button class="close" onclick="document.getElementById('modal').classList.remove('show')">Đóng</button><h3>${tag(k)} ${esc(s.name)}</h3>
- <div class="row" style="margin:8px 0"><span class="small">Câu ${qid}: ${esc(CQ.question)}</span></div>
- <div class="row" style="margin:0 0 8px">${MK.map(mm=>`<button class="mbtn ${mm===m?'on':''}" onclick="openQ('${k}','${mm}')">${esc(mname(mm))}</button>`).join('')}</div>
+ <div class="small" style="margin:6px 0">Câu ${qid}: ${esc(CQ.question)}</div>
+ <div class="row msel" style="margin:0 0 8px"><span class="small">Chọn model để so sánh:</span>${MK.map(mm=>`<label class="mck"><input type="checkbox" value="${mm}" ${ms.includes(mm)?'checked':''}> ${esc(mname(mm))}</label>`).join('')}
+ <button class="btn" id="mok">OK</button></div>
  <h4>Là gì · chạy thế nào</h4><p>${e.what} ${e.how}</p>
- <h4>Kết quả trên câu này, model này</h4>${why(qid,m,k,E,R)}
- <h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}
+ <div class="mgrid" style="grid-template-columns:repeat(${ms.length},minmax(0,1fr))">${ms.map(m=>`<div class="mcell"><div class="mh">${esc(mname(m))}</div>
+  <h4>Kết quả trên câu này</h4>${why(qid,m,k,E,R)}<h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}</div>`).join('')}</div>
  <h4>Toàn bộ benchmark</h4><table><tr><th>Model</th><th>Dev Hit@1</th><th>Dev Evidence Hit@3</th><th>Test Evidence Hit@3</th></tr>${nums(k)}</table>`;
+ $('#mok').onclick=()=>{const sel=[...document.querySelectorAll('.msel input:checked')].map(i=>i.value);if(sel.length)openQ(k,sel)};
  $('#modal').classList.add('show')}
 function renderLive(){
  $('#live').innerHTML=`<div class="panel"><div class="row"><input type="text" id="lq" placeholder="Hỏi về AI Act hoặc GDPR, ví dụ: How long do I have to report a data breach?">
