@@ -19,7 +19,10 @@ def _vec(v: list[float]) -> str:
 
 
 class PgVectorStore:
-    def __init__(self, database_url: str, dimensions: int) -> None:
+    def __init__(self, database_url: str, dimensions: int, table: str = "chunks") -> None:
+        if not table.replace("_", "").isalnum():
+            raise ValueError("bad table name")
+        self.table = table
         if dimensions <= 0:
             raise ValueError("dimensions must be positive")
         self.url = database_url
@@ -32,7 +35,7 @@ class PgVectorStore:
         with self._conn() as c:
             c.execute("CREATE EXTENSION IF NOT EXISTS vector")
             c.execute(f"""
-                CREATE TABLE IF NOT EXISTS chunks (
+                CREATE TABLE IF NOT EXISTS {self.table} (
                     strategy     text    NOT NULL,
                     chunk_id     text    NOT NULL,
                     document_id  text    NOT NULL,
@@ -51,7 +54,7 @@ class PgVectorStore:
                     embedding    vector({self.dimensions}) NOT NULL,
                     PRIMARY KEY (strategy, chunk_id)
                 )""")
-            c.execute("CREATE INDEX IF NOT EXISTS chunks_filter ON chunks (strategy, part, regulation)")
+            c.execute(f"CREATE INDEX IF NOT EXISTS {self.table}_filter ON {self.table} (strategy, part, regulation)")
 
     def upsert(self, strategy: str, chunks: list[Chunk], vectors: list[list[float]]) -> dict[str, int]:
         """Insert/update by stable ID; delete chunks of the same (strategy, document) that disappeared."""
@@ -65,8 +68,8 @@ class PgVectorStore:
         with self._conn() as c, c.cursor() as cur:
             for ch, v in zip(chunks, vectors):
                 m = ch.metadata
-                cur.execute("""
-                    INSERT INTO chunks (strategy, chunk_id, document_id, source, page, page_end, regulation, year,
+                cur.execute(f"""
+                    INSERT INTO {self.table} (strategy, chunk_id, document_id, source, page, page_end, regulation, year,
                                         part, chapter, article, annex, text, content_sha, metadata, embedding)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::vector)
                     ON CONFLICT (strategy, chunk_id) DO UPDATE SET
@@ -75,21 +78,21 @@ class PgVectorStore:
                         part=EXCLUDED.part, chapter=EXCLUDED.chapter, article=EXCLUDED.article,
                         annex=EXCLUDED.annex, text=EXCLUDED.text, content_sha=EXCLUDED.content_sha,
                         metadata=EXCLUDED.metadata, embedding=EXCLUDED.embedding
-                    WHERE chunks.content_sha <> EXCLUDED.content_sha""",
+                    WHERE {self.table}.content_sha <> EXCLUDED.content_sha""",
                     (strategy, ch.chunk_id, ch.document_id, ch.source, ch.page, m.get("page_end", ch.page),
                      m.get("regulation"), m.get("year"), m.get("part"), m.get("chapter"), m.get("article"),
                      m.get("annex"), ch.text, content_hash(ch.text), json.dumps(m, ensure_ascii=False), _vec(v)))
                 stats["inserted_or_updated"] += cur.rowcount
                 by_doc.setdefault(ch.document_id, set()).add(ch.chunk_id)
             for doc, ids in by_doc.items():
-                cur.execute("DELETE FROM chunks WHERE strategy=%s AND document_id=%s AND NOT (chunk_id = ANY(%s))",
+                cur.execute(f"DELETE FROM {self.table} WHERE strategy=%s AND document_id=%s AND NOT (chunk_id = ANY(%s))",
                             (strategy, doc, list(ids)))
                 stats["deleted_stale"] += cur.rowcount
         return stats
 
     def count(self, strategy: str) -> int:
         with self._conn() as c:
-            return c.execute("SELECT count(*) FROM chunks WHERE strategy=%s", (strategy,)).fetchone()[0]
+            return c.execute(f"SELECT count(*) FROM {self.table} WHERE strategy=%s", (strategy,)).fetchone()[0]
 
     def search(self, strategy: str, query_vector: list[float], top_k: int = 3,
                filters: dict[str, Any] | None = None) -> list[dict[str, Any]]:
@@ -102,7 +105,7 @@ class PgVectorStore:
             params.append(value)
         sql = f"""SELECT chunk_id, document_id, source, page, page_end, regulation, part, chapter, article, annex,
                          text, 1 - (embedding <=> %s::vector) AS score
-                  FROM chunks WHERE {' AND '.join(where)}
+                  FROM {self.table} WHERE {' AND '.join(where)}
                   ORDER BY embedding <=> %s::vector LIMIT %s"""
         qv = _vec(query_vector)
         with self._conn() as c, c.cursor(row_factory=dict_row) as cur:

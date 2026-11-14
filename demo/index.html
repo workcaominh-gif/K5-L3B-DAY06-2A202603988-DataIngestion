@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Day 6 · Data Ingestion demo</title>
+<style>
+:root{--ink:#1d2321;--mut:#6b6f6c;--bg:#f7f8fa;--card:#fff;--line:#e6e8ec;--b:#1f5fa8;--g:#1f6b4a;--gb:#e3f1e9;--r:#a8281b;--rb:#fbe3df;--a:#8a6516;--ab:#fbefd3}
+*{box-sizing:border-box}body{margin:0;font-family:"Be Vietnam Pro","Noto Sans","Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);font-size:15px;line-height:1.45}
+header{background:#fff;padding:16px 24px 0;box-shadow:0 1px 0 rgba(0,0,0,.05)}
+h1{font-size:20px;margin:0}.sub{color:var(--mut);font-size:13px;margin-top:2px}
+nav{display:flex;gap:4px;margin-top:12px}nav button{border:0;background:none;padding:9px 14px;font:inherit;font-size:14px;cursor:pointer;border-bottom:3px solid transparent;color:var(--mut)}
+nav button.on{border-color:var(--b);color:var(--ink);font-weight:600}
+main{padding:18px 24px;max-width:1380px}
+.panel{background:var(--card);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.panel h2{font-size:16px;margin:0 0 10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--mut);font-weight:600;font-size:12.5px}
+td.num{text-align:center;font-variant-numeric:tabular-nums;border-radius:6px}
+.legend{font-size:12.5px;color:var(--mut);margin-top:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+select,input{font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+input[type=text]{flex:1;min-width:260px}
+.btn{border:0;border-radius:8px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer;background:var(--b);color:#fff}
+.q{background:#eef4fd;border-radius:12px;padding:10px 14px;margin-bottom:12px}.q b{font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.col{background:#fff;border-radius:12px;padding:10px 12px}.col h3{margin:0 0 6px;font-size:14px;display:flex;justify-content:space-between}
+.hit{border-radius:10px;padding:8px 10px;margin-top:6px;background:#f2f4f7;font-size:13px}
+.hit.ok{background:var(--gb);box-shadow:inset 3px 0 0 var(--g)}
+.meta{font-size:11.5px;color:var(--mut);margin-bottom:3px;display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-block;border-radius:999px;padding:0 7px;font-size:11.5px;background:#fff}
+.chip.ok{background:var(--g);color:#fff}.chip.no{background:var(--r);color:#fff}
+.txt{white-space:pre-wrap;max-height:180px;overflow:auto}
+mark{background:#ffe08a;border-radius:3px}
+.err{color:var(--r);font-size:13.5px}
+.small{font-size:12.5px;color:var(--mut)}
+@media (max-width:700px){main,header{padding-left:16px;padding-right:16px}}
+</style></head>
+<body>
+<header>
+ <h1>Day 6 · Data Ingestion: so sánh chiến lược chunking và model embedding</h1>
+ <div class="sub">Corpus: EU AI Act (bản Nghị viện thông qua 13/03/2024) + GDPR · 572 trang nội dung · PostgreSQL + pgvector · 24 câu benchmark (18 dev / 6 test)</div>
+ <nav><button data-t="res" class="on">Kết quả</button><button data-t="cmp">So sánh câu hỏi</button><button data-t="live">Tìm thử</button></nav>
+</header>
+<main>
+ <section id="res"></section>
+ <section id="cmp" hidden></section>
+ <section id="live" hidden></section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let D=null,Q=[],TR={};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['res','cmp','live'].forEach(id=>$('#'+id).hidden=id!==b.dataset.t)});
+function heat(n,N){if(!N)return '';const p=n/N;return `background:rgba(31,107,74,${(0.08+p*0.55).toFixed(2)});${p>0.6?'color:#fff;':''}`}
+function cell(v,k){if(!v)return '<td class="num">-</td>';return `<td class="num" style="${heat(v[k],v.n)}">${v[k]}/${v.n}</td>`}
+async function load(){
+ try{D=await (await fetch('../starter/results/report_data.json',{cache:'no-store'})).json()}catch(e){$('#res').innerHTML='<div class="panel err">Chưa có results/report_data.json: chạy <code>python -m src.report</code>.</div>';return}
+ Q=(await (await fetch('../benchmark/questions.jsonl')).text()).trim().split('\n').map(l=>JSON.parse(l));
+ renderRes();renderCmp();renderLive();
+}
+function renderRes(){
+ const S=D.strategies;let h='';
+ for(const m of D.models){const r=D.retrieval[m.key];if(!r)continue;
+  h+=`<div class="panel"><h2>${esc(m.name)} <span class="small">${m.dims} chiều</span></h2><table><tr><th>Chiến lược</th><th>Dev Hit@1</th><th>Dev Evidence Hit@3</th><th>Test Hit@1</th><th>Test Evidence Hit@3</th><th>Chunk</th></tr>`;
+  for(const s of S){const x=r[s.key]||{};const ing=(D.ingest[m.key]?.strategies||{})[s.key==='C'?'B':s.key]||{};
+   h+=`<tr><td><b>${s.key}</b> · ${esc(s.name)}</td>${cell(x.dev,'hit1')}${cell(x.dev,'hit3')}${cell(x.test,'hit1')}${cell(x.test,'hit3')}<td class="num">${ing.chunks??'-'}</td></tr>`}
+  h+='</table></div>'}
+ const M=D.manual_bge;
+ h+=`<div class="panel"><h2>Chấm tay (model bge-small)</h2><table><tr><th>Chiến lược</th><th>Coherence TB /2 (10 vị trí)</th><th>Metadata đủ & đúng (test top-3)</th><th>Grounding 0/1/2 (6 câu test)</th><th>Grounding TB /2</th></tr>`;
+ for(const s of S){const x=M[s.key];h+=`<tr><td><b>${s.key}</b> · ${esc(s.name)}</td><td class="num" style="${heat(x.coherence_mean??0,2)}">${x.coherence_mean??'-'}</td><td class="num" style="${heat(x.metadata_ok,x.metadata_n)}">${x.metadata_ok}/${x.metadata_n}</td><td class="num">${(x.grounding_counts||[]).join(' / ')}</td><td class="num" style="${heat(x.grounding_mean??0,2)}">${x.grounding_mean??'-'}</td></tr>`}
+ h+=`</table><div class="legend">Nhãn chấm tay do Claude (trợ lý AI) gán theo thang của đề và học viên rà lại; có nguy cơ thiên lệch phía tác giả. File: starter/results/manual/*.csv.</div></div>`;
+ const L=D.llm_chunking||{};
+ h+=`<div class="panel"><h2>Chi phí LLM chunking (L)</h2><div class="small">Model ${esc(L.model)} · ${L.pages} trang mẫu · token vào ${L.tokens?.input}, đọc từ cache ${L.tokens?.cache_read}, ra ${L.tokens?.output} · ước tính $${L.cost_usd_estimate}. Các trang ngoài mẫu dùng chunk đệ quy D.</div></div>`;
+ $('#res').innerHTML=h;
+}
+async function traces(model,s){const k=model+'/'+s;if(!TR[k]){const t=await (await fetch(`../starter/results/traces/${model}/traces_${s}.jsonl`)).text();TR[k]=Object.fromEntries(t.trim().split('\n').map(l=>{const o=JSON.parse(l);return [o.id,o]}))}return TR[k]}
+function mark(text,ev){const t=esc(text);const e=esc(ev);const i=t.toLowerCase().indexOf(e.toLowerCase().slice(0,40));return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+e.length)+'</mark>'+t.slice(i+e.length)}
+function renderCmp(){
+ $('#cmp').innerHTML=`<div class="panel"><div class="row"><select id="cq">${Q.map(q=>`<option value="${q.id}">${q.id} [${q.split}] ${esc(q.question.slice(0,90))}</option>`).join('')}</select>
+ <select id="cm">${D.models.filter(m=>D.retrieval[m.key]).map(m=>`<option value="${m.key}">${esc(m.name)}</option>`).join('')}</select></div><div id="cbody"></div></div>`;
+ $('#cq').onchange=$('#cm').onchange=showCmp;showCmp();
+}
+async function showCmp(){
+ const q=Q.find(x=>x.id===$('#cq').value),m=$('#cm').value;
+ let h=`<div class="q"><b>${esc(q.question)}</b><div class="small">Gold: ${q.gold_source_id} trang ${q.gold_page}${q.filter?` · lọc ${esc(JSON.stringify(q.filter))} (chỉ áp dụng ở C)`:''} · Đáp án: ${esc(q.expected_answer)}</div></div><div class="grid">`;
+ for(const s of D.strategies){const t=(await traces(m,s.key))[q.id];
+  h+=`<div class="col"><h3><span>${s.key} · ${esc(s.name)}</span><span class="chip ${t.hit_at_3?'ok':'no'}">${t.hit_at_3?'Hit@3':'trượt'}</span></h3>`;
+  for(const x of t.top3)h+=`<div class="hit ${x.is_hit?'ok':''}"><div class="meta"><span>#${x.rank}</span><span>${x.document_id} p${x.page}${x.page_end&&x.page_end!==x.page?'–'+x.page_end:''}</span><span>${x.part||''}${x.article?' · Art. '+x.article:''}${x.annex?' · Annex '+x.annex:''}</span><span>score ${x.score}</span></div><div class="txt">${mark(x.text,q.evidence_quote)}</div></div>`;
+  h+='</div>'}
+ $('#cbody').innerHTML=h+'</div>';
+}
+function renderLive(){
+ $('#live').innerHTML=`<div class="panel"><div class="row"><input type="text" id="lq" placeholder="Hỏi về AI Act hoặc GDPR, ví dụ: How long do I have to report a data breach?">
+ <select id="lm">${D.models.map(m=>`<option value="${m.key}">${esc(m.name)}</option>`).join('')}</select>
+ <select id="lp"><option value="">không lọc</option><option value="recital">part = recital</option><option value="article">part = article</option><option value="annex">part = annex</option></select>
+ <button class="btn" id="lgo">Tìm trên mọi chiến lược</button></div><div class="small">Cần server: <code>cd starter && python -m src.demo_server</code>. Lọc chỉ áp dụng cho C.</div><div id="lres" class="grid" style="margin-top:12px"></div></div>`;
+ $('#lgo').onclick=runLive;$('#lq').onkeydown=e=>{if(e.key==='Enter')runLive()};
+}
+async function runLive(){
+ const query=$('#lq').value.trim();if(!query)return;const model=$('#lm').value,part=$('#lp').value;
+ $('#lres').innerHTML='<div class="small">Đang tìm…</div>';let h='';
+ for(const s of D.strategies){
+  try{const r=await fetch('/api/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query,model,strategy:s.key,part})});const j=await r.json();if(j.error)throw new Error(j.error);
+   h+=`<div class="col"><h3><span>${s.key} · ${esc(s.name)}</span>${j.filter?`<span class="chip">lọc ${esc(j.filter.part)}</span>`:''}</h3>`+j.hits.map((x,i)=>`<div class="hit"><div class="meta"><span>#${i+1}</span><span>${x.document_id} p${x.page}</span><span>${x.part||''}${x.article?' · Art. '+x.article:''}</span><span>score ${x.score}</span></div><div class="txt">${esc(x.text)}</div></div>`).join('')+'</div>'}
+  catch(e){h+=`<div class="col err">${s.key}: ${esc(e.message)}</div>`}
+  $('#lres').innerHTML=h;
+ }
+}
+load();
+</script>
+</body></html>

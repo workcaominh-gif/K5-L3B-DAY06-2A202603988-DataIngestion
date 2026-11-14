@@ -1,8 +1,71 @@
 {
-  "embedding_model": "BAAI/bge-small-en-v1.5",
   "top_k": 3,
-  "A": {"chunking": "fixed_size", "chunk_size": 500, "overlap": 50, "scope": "per page", "filter": false},
-  "D": {"chunking": "recursive (paragraph > line > sentence > word)", "chunk_size": 800, "overlap": 80, "scope": "per page", "filter": false},
-  "B": {"chunking": "structure_aware (recital / Article / numbered paragraph / annex point) + context header", "chunk_size": 1200, "overlap": 0, "scope": "whole document, records page..page_end", "filter": false},
-  "C": {"chunking": "same index as B", "filter": true, "filter_fields": ["part"], "note": "filter applied only to questions whose context supplies it; other questions run unfiltered"}
+  "models": [
+    {
+      "key": "bge",
+      "name": "BAAI/bge-small-en-v1.5",
+      "dims": 384,
+      "note": "primary model; query instruction prefix"
+    },
+    {
+      "key": "minilm",
+      "name": "sentence-transformers/all-MiniLM-L6-v2",
+      "dims": 384,
+      "note": "no prompts; max 256 word pieces"
+    },
+    {
+      "key": "gemma",
+      "name": "google/embeddinggemma-300m",
+      "dims": 768,
+      "note": "built-in query/document prompts; gated (HF_TOKEN)"
+    }
+  ],
+  "F": {
+    "chunking": "fixed_size, no overlap",
+    "chunk_size": 500,
+    "overlap": 0,
+    "scope": "per page"
+  },
+  "A": {
+    "chunking": "fixed_size + overlap 10%",
+    "chunk_size": 500,
+    "overlap": 50,
+    "scope": "per page"
+  },
+  "D": {
+    "chunking": "recursive (paragraph > line > sentence > word)",
+    "chunk_size": 800,
+    "overlap": 80,
+    "scope": "per page"
+  },
+  "B": {
+    "chunking": "document structure (recital / Article / numbered paragraph / annex point) + context header",
+    "chunk_size": 1200,
+    "overlap": 0,
+    "scope": "whole document, page..page_end"
+  },
+  "S": {
+    "chunking": "semantic: cut at lowest-percentile similarity between consecutive sentences",
+    "max_size": 1200,
+    "min_size": 200,
+    "percentile": 10,
+    "boundary_model": "BAAI/bge-small-en-v1.5",
+    "scope": "per page"
+  },
+  "L": {
+    "chunking": "agentic: Claude Haiku 5.5 picks breakpoints on a SMALL SAMPLE of pages (gold pages + random); other pages use D",
+    "llm_model": "claude-haiku-5-5",
+    "random_pages": 5,
+    "seed": 42,
+    "max_size": 1200,
+    "scope": "per page"
+  },
+  "C": {
+    "chunking": "same index as B",
+    "filter": true,
+    "filter_fields": [
+      "part"
+    ],
+    "note": "filter applied only to the 4 questions whose context supplies it"
+  }
 }

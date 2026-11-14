@@ -1,0 +1,127 @@
+strategy,qid,rank,chunk_id,document_id,source,page,page_end,part_stored,part_true,text_on_page,complete_and_correct,article_stored,article_true,complete_and_correct_incl_article,error
+F,q04,1,F:gdpr-2016:p24:4,gdpr-2016,Third-party LaTeX layout of the official,24,24,recital,recital,True,True,,,True,
+F,q04,2,F:gdpr-2016:p56:3,gdpr-2016,Third-party LaTeX layout of the official,56,56,article,article,True,True,11,12,False,article says 11 but chunk is in Article 12
+F,q04,3,F:gdpr-2016:p17:1,gdpr-2016,Third-party LaTeX layout of the official,17,17,recital,recital,True,True,,,True,
+F,q09,1,F:gdpr-2016:p75:3,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+F,q09,2,F:gdpr-2016:p75:4,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+F,q09,3,F:gdpr-2016:p76:0,gdpr-2016,Third-party LaTeX layout of the official,76,76,article,article,True,True,37,37,True,
+F,q14,1,F:eu-ai-act-2024:p166:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,166,166,article,article,True,True,2,3,False,article says 2 but chunk is in Article 3
+F,q14,2,F:eu-ai-act-2024:p15:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,15,15,recital,recital,True,True,,,True,
+F,q14,3,F:eu-ai-act-2024:p169:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,169,169,article,article,True,True,3,3,True,
+F,q19,1,F:eu-ai-act-2024:p191:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,191,191,article,article,True,True,6,6,True,
+F,q19,2,F:eu-ai-act-2024:p191:2,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,191,191,article,article,True,True,6,6,True,
+F,q19,3,F:eu-ai-act-2024:p61:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,61,61,recital,recital,True,True,,,True,
+F,q21,1,F:eu-ai-act-2024:p120:2,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,120,120,recital,recital,True,True,,,True,
+F,q21,2,F:eu-ai-act-2024:p178:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,178,178,article,article,True,True,3,3,True,
+F,q21,3,F:eu-ai-act-2024:p284:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,284,284,article,article,True,True,50,50,True,
+F,q23,1,F:eu-ai-act-2024:p1:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,1,1,recital,recital,True,True,,,True,
+F,q23,2,F:eu-ai-act-2024:p3:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,3,3,recital,recital,True,True,,,True,
+F,q23,3,F:eu-ai-act-2024:p407:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,407,407,article,article,True,True,108,108,True,
+A,q04,1,A:gdpr-2016:p56:3,gdpr-2016,Third-party LaTeX layout of the official,56,56,article,article,True,True,11,12,False,article says 11 but chunk is in Article 12
+A,q04,2,A:gdpr-2016:p24:5,gdpr-2016,Third-party LaTeX layout of the official,24,24,recital,recital,True,True,,,True,
+A,q04,3,A:gdpr-2016:p56:4,gdpr-2016,Third-party LaTeX layout of the official,56,56,article,article,True,True,11,12,False,article says 11 but chunk is in Article 12
+A,q09,1,A:gdpr-2016:p75:4,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+A,q09,2,A:gdpr-2016:p75:2,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+A,q09,3,A:gdpr-2016:p75:5,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+A,q14,1,A:eu-ai-act-2024:p166:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,166,166,article,article,True,True,2,3,False,article says 2 but chunk is in Article 3
+A,q14,2,A:eu-ai-act-2024:p15:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,15,15,recital,recital,True,True,,,True,
+A,q14,3,A:eu-ai-act-2024:p47:2,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,47,47,recital,recital,True,True,,,True,
+A,q19,1,A:eu-ai-act-2024:p191:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,191,191,article,article,True,True,6,6,True,
+A,q19,2,A:eu-ai-act-2024:p353:3,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,353,353,article,article,True,True,74,74,True,
+A,q19,3,A:eu-ai-act-2024:p117:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,117,117,recital,recital,True,True,,,True,
+A,q21,1,A:eu-ai-act-2024:p178:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,178,178,article,article,True,True,3,3,True,
+A,q21,2,A:eu-ai-act-2024:p284:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,284,284,article,article,True,True,50,50,True,
+A,q21,3,A:eu-ai-act-2024:p120:2,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,120,120,recital,recital,True,True,,,True,
+A,q23,1,A:eu-ai-act-2024:p1:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,1,1,recital,recital,True,True,,,True,
+A,q23,2,A:eu-ai-act-2024:p3:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,3,3,recital,recital,True,True,,,True,
+A,q23,3,A:eu-ai-act-2024:p407:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,407,407,article,article,True,True,108,108,True,
+D,q04,1,D:gdpr-2016:p56:2,gdpr-2016,Third-party LaTeX layout of the official,56,56,article,article,True,True,11,12,False,article says 11 but chunk is in Article 12
+D,q04,2,D:gdpr-2016:p71:2,gdpr-2016,Third-party LaTeX layout of the official,71,71,article,article,True,True,32,33,False,article says 32 but chunk is in Article 33
+D,q04,3,D:gdpr-2016:p16:3,gdpr-2016,Third-party LaTeX layout of the official,16,16,recital,recital,True,True,,,True,
+D,q09,1,D:gdpr-2016:p75:3,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+D,q09,2,D:gdpr-2016:p75:1,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,36,True,
+D,q09,3,D:gdpr-2016:p76:0,gdpr-2016,Third-party LaTeX layout of the official,76,76,article,article,True,True,37,37,True,
+D,q14,1,D:eu-ai-act-2024:p166:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,166,166,article,article,True,True,2,3,False,article says 2 but chunk is in Article 3
+D,q14,2,D:eu-ai-act-2024:p430:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,430,430,annex,annex,True,True,,,True,
+D,q14,3,D:eu-ai-act-2024:p15:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,15,15,recital,recital,True,True,,,True,
+D,q19,1,D:eu-ai-act-2024:p191:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,191,191,article,article,True,True,6,6,True,
+D,q19,2,D:eu-ai-act-2024:p87:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,87,87,recital,recital,True,True,,,True,
+D,q19,3,D:eu-ai-act-2024:p424:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,424,424,annex,annex,True,True,,,True,
+D,q21,1,D:eu-ai-act-2024:p178:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,178,178,article,article,True,True,3,3,True,
+D,q21,2,D:eu-ai-act-2024:p284:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,284,284,article,article,True,True,50,50,True,
+D,q21,3,D:eu-ai-act-2024:p120:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,120,120,recital,recital,True,True,,,True,
+D,q23,1,D:eu-ai-act-2024:p1:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,1,1,recital,recital,True,True,,,True,
+D,q23,2,D:eu-ai-act-2024:p407:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,407,407,article,article,True,True,108,108,True,
+D,q23,3,D:eu-ai-act-2024:p3:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,3,3,recital,recital,True,True,,,True,
+B,q04,1,B:gdpr-2016:233,gdpr-2016,Third-party LaTeX layout of the official,56,56,article,article,True,True,12,12,True,
+B,q04,2,B:gdpr-2016:246,gdpr-2016,Third-party LaTeX layout of the official,59,59,article,article,True,True,14,14,True,
+B,q04,3,B:gdpr-2016:64,gdpr-2016,Third-party LaTeX layout of the official,17,17,recital,recital,True,True,,,True,
+B,q09,1,B:gdpr-2016:308,gdpr-2016,Third-party LaTeX layout of the official,76,76,article,article,True,True,38,38,True,
+B,q09,2,B:gdpr-2016:305,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,37,37,True,
+B,q09,3,B:gdpr-2016:307,gdpr-2016,Third-party LaTeX layout of the official,76,76,article,article,True,True,38,38,True,
+B,q14,1,B:eu-ai-act-2024:308,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,166,180,article,article,True,True,3,3,True,
+B,q14,2,B:eu-ai-act-2024:26,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,14,15,recital,recital,True,True,,,True,
+B,q14,3,B:eu-ai-act-2024:24,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,14,15,recital,recital,True,True,,,True,
+B,q19,1,B:eu-ai-act-2024:121,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,61,61,recital,recital,True,True,,,True,
+B,q19,2,B:eu-ai-act-2024:106,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,52,53,recital,recital,True,True,,,True,
+B,q19,3,B:eu-ai-act-2024:100,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,49,50,recital,recital,True,True,,,True,
+B,q21,1,B:eu-ai-act-2024:231,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,120,120,recital,recital,True,True,,,True,
+B,q21,2,B:eu-ai-act-2024:227,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,119,119,recital,recital,True,True,,,True,
+B,q21,3,B:eu-ai-act-2024:225,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,118,118,recital,recital,True,True,,,True,
+B,q23,1,B:eu-ai-act-2024:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,1,4,recital,recital,True,True,,,True,
+B,q23,2,B:eu-ai-act-2024:486,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,280,281,article,article,True,True,49,49,True,
+B,q23,3,B:eu-ai-act-2024:485,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,280,280,article,article,True,True,49,49,True,
+S,q04,1,S:gdpr-2016:p71:2,gdpr-2016,Third-party LaTeX layout of the official,71,71,article,article,True,True,32,33,False,article says 32 but chunk is in Article 33
+S,q04,2,S:gdpr-2016:p59:1,gdpr-2016,Third-party LaTeX layout of the official,59,59,article,article,True,True,14,14,True,
+S,q04,3,S:gdpr-2016:p18:0,gdpr-2016,Third-party LaTeX layout of the official,18,18,recital,recital,True,True,,,True,
+S,q09,1,S:gdpr-2016:p75:2,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,36,True,
+S,q09,2,S:gdpr-2016:p75:3,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+S,q09,3,S:gdpr-2016:p76:2,gdpr-2016,Third-party LaTeX layout of the official,76,76,article,article,True,True,37,38,False,article says 37 but chunk is in Article 38
+S,q14,1,S:eu-ai-act-2024:p166:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,166,166,article,article,True,True,2,3,False,article says 2 but chunk is in Article 3
+S,q14,2,S:eu-ai-act-2024:p15:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,15,15,recital,recital,True,True,,,True,
+S,q14,3,S:eu-ai-act-2024:p430:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,430,430,annex,annex,True,True,,,True,
+S,q19,1,S:eu-ai-act-2024:p191:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,191,191,article,article,True,True,6,6,True,
+S,q19,2,S:eu-ai-act-2024:p53:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,53,53,recital,recital,True,True,,,True,
+S,q19,3,S:eu-ai-act-2024:p61:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,61,61,recital,recital,True,True,,,True,
+S,q21,1,S:eu-ai-act-2024:p120:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,120,120,recital,recital,True,True,,,True,
+S,q21,2,S:eu-ai-act-2024:p178:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,178,178,article,article,True,True,3,3,True,
+S,q21,3,S:eu-ai-act-2024:p284:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,284,284,article,article,True,True,50,50,True,
+S,q23,1,S:eu-ai-act-2024:p1:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,1,1,recital,recital,True,True,,,True,
+S,q23,2,S:eu-ai-act-2024:p3:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,3,3,recital,recital,True,True,,,True,
+S,q23,3,S:eu-ai-act-2024:p407:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,407,407,article,article,True,True,108,108,True,
+L,q04,1,L:gdpr-2016:p56:6,gdpr-2016,Third-party LaTeX layout of the official,56,56,article,article,True,True,11,12,False,article says 11 but chunk is in Article 12
+L,q04,2,L:gdpr-2016:p71:4,gdpr-2016,Third-party LaTeX layout of the official,71,71,article,article,True,True,32,33,False,article says 32 but chunk is in Article 33
+L,q04,3,L:gdpr-2016:p24:2,gdpr-2016,Third-party LaTeX layout of the official,24,24,recital,recital,True,True,,,True,
+L,q09,1,L:gdpr-2016:p75:11,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+L,q09,2,L:gdpr-2016:p75:4,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+L,q09,3,L:gdpr-2016:p75:12,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,36,37,False,article says 36 but chunk is in Article 37
+L,q14,1,L:eu-ai-act-2024:p166:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,166,166,article,article,True,True,2,3,False,article says 2 but chunk is in Article 3
+L,q14,2,L:eu-ai-act-2024:p430:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,430,430,annex,annex,True,True,,,True,
+L,q14,3,L:eu-ai-act-2024:p15:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,15,15,recital,recital,True,True,,,True,
+L,q19,1,L:eu-ai-act-2024:p191:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,191,191,article,article,True,True,6,6,True,
+L,q19,2,L:eu-ai-act-2024:p87:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,87,87,recital,recital,True,True,,,True,
+L,q19,3,L:eu-ai-act-2024:p424:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,424,424,annex,annex,True,True,,,True,
+L,q21,1,L:eu-ai-act-2024:p178:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,178,178,article,article,True,True,3,3,True,
+L,q21,2,L:eu-ai-act-2024:p284:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,284,284,article,article,True,True,50,50,True,
+L,q21,3,L:eu-ai-act-2024:p120:1,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,120,120,recital,recital,True,True,,,True,
+L,q23,1,L:eu-ai-act-2024:p1:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,1,1,recital,recital,True,True,,,True,
+L,q23,2,L:eu-ai-act-2024:p407:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,407,407,article,article,True,True,108,108,True,
+L,q23,3,L:eu-ai-act-2024:p3:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,3,3,recital,recital,True,True,,,True,
+C,q04,1,B:gdpr-2016:233,gdpr-2016,Third-party LaTeX layout of the official,56,56,article,article,True,True,12,12,True,
+C,q04,2,B:gdpr-2016:246,gdpr-2016,Third-party LaTeX layout of the official,59,59,article,article,True,True,14,14,True,
+C,q04,3,B:gdpr-2016:64,gdpr-2016,Third-party LaTeX layout of the official,17,17,recital,recital,True,True,,,True,
+C,q09,1,B:gdpr-2016:308,gdpr-2016,Third-party LaTeX layout of the official,76,76,article,article,True,True,38,38,True,
+C,q09,2,B:gdpr-2016:305,gdpr-2016,Third-party LaTeX layout of the official,75,75,article,article,True,True,37,37,True,
+C,q09,3,B:gdpr-2016:307,gdpr-2016,Third-party LaTeX layout of the official,76,76,article,article,True,True,38,38,True,
+C,q14,1,B:eu-ai-act-2024:308,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,166,180,article,article,True,True,3,3,True,
+C,q14,2,B:eu-ai-act-2024:26,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,14,15,recital,recital,True,True,,,True,
+C,q14,3,B:eu-ai-act-2024:24,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,14,15,recital,recital,True,True,,,True,
+C,q19,1,B:eu-ai-act-2024:700,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,424,424,annex,annex,True,True,,,True,
+C,q19,2,B:eu-ai-act-2024:701,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,424,425,annex,annex,True,True,,,True,
+C,q19,3,B:eu-ai-act-2024:702,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,425,426,annex,annex,True,True,,,True,
+C,q21,1,B:eu-ai-act-2024:231,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,120,120,recital,recital,True,True,,,True,
+C,q21,2,B:eu-ai-act-2024:227,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,119,119,recital,recital,True,True,,,True,
+C,q21,3,B:eu-ai-act-2024:225,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,118,118,recital,recital,True,True,,,True,
+C,q23,1,B:eu-ai-act-2024:0,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,1,4,recital,recital,True,True,,,True,
+C,q23,2,B:eu-ai-act-2024:486,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,280,281,article,article,True,True,49,49,True,
+C,q23,3,B:eu-ai-act-2024:485,eu-ai-act-2024,https://www.europarl.europa.eu/doceo/doc,280,280,article,article,True,True,49,49,True,

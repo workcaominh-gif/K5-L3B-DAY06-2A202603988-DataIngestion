@@ -1,0 +1,919 @@
+{
+ "strategies": [
+  {
+   "key": "F",
+   "name": "Fixed 500, no overlap",
+   "config": {
+    "chunking": "fixed_size, no overlap",
+    "chunk_size": 500,
+    "overlap": 0,
+    "scope": "per page"
+   }
+  },
+  {
+   "key": "A",
+   "name": "Fixed 500 + overlap 50",
+   "config": {
+    "chunking": "fixed_size + overlap 10%",
+    "chunk_size": 500,
+    "overlap": 50,
+    "scope": "per page"
+   }
+  },
+  {
+   "key": "D",
+   "name": "Recursive 800/80",
+   "config": {
+    "chunking": "recursive (paragraph > line > sentence > word)",
+    "chunk_size": 800,
+    "overlap": 80,
+    "scope": "per page"
+   }
+  },
+  {
+   "key": "B",
+   "name": "Document structure",
+   "config": {
+    "chunking": "document structure (recital / Article / numbered paragraph / annex point) + context header",
+    "chunk_size": 1200,
+    "overlap": 0,
+    "scope": "whole document, page..page_end"
+   }
+  },
+  {
+   "key": "S",
+   "name": "Semantic (similarity breaks)",
+   "config": {
+    "chunking": "semantic: cut at lowest-percentile similarity between consecutive sentences",
+    "max_size": 1200,
+    "min_size": 200,
+    "percentile": 10,
+    "boundary_model": "BAAI/bge-small-en-v1.5",
+    "scope": "per page"
+   }
+  },
+  {
+   "key": "L",
+   "name": "Agentic LLM (Haiku, sample)",
+   "config": {
+    "chunking": "agentic: Claude Haiku 5.5 picks breakpoints on a SMALL SAMPLE of pages (gold pages + random); other pages use D",
+    "llm_model": "claude-haiku-5-5",
+    "random_pages": 5,
+    "seed": 42,
+    "max_size": 1200,
+    "scope": "per page"
+   }
+  },
+  {
+   "key": "C",
+   "name": "Structure + metadata filter",
+   "config": {
+    "chunking": "same index as B",
+    "filter": true,
+    "filter_fields": [
+     "part"
+    ],
+    "note": "filter applied only to the 4 questions whose context supplies it"
+   }
+  }
+ ],
+ "models": [
+  {
+   "key": "bge",
+   "name": "BAAI/bge-small-en-v1.5",
+   "dims": 384,
+   "note": "primary model; query instruction prefix"
+  },
+  {
+   "key": "minilm",
+   "name": "sentence-transformers/all-MiniLM-L6-v2",
+   "dims": 384,
+   "note": "no prompts; max 256 word pieces"
+  },
+  {
+   "key": "gemma",
+   "name": "google/embeddinggemma-300m",
+   "dims": 768,
+   "note": "built-in query/document prompts; gated (HF_TOKEN)"
+  }
+ ],
+ "retrieval": {
+  "bge": {
+   "F": {
+    "dev": {
+     "n": 18,
+     "hit1": 3,
+     "hit3": 6,
+     "evidence_split": 2,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 1,
+     "hit3": 2,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "A": {
+    "dev": {
+     "n": 18,
+     "hit1": 7,
+     "hit3": 8,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 4,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "D": {
+    "dev": {
+     "n": 18,
+     "hit1": 8,
+     "hit3": 9,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 4,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "B": {
+    "dev": {
+     "n": 18,
+     "hit1": 8,
+     "hit3": 13,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 3,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "S": {
+    "dev": {
+     "n": 18,
+     "hit1": 6,
+     "hit3": 8,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 3,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "L": {
+    "dev": {
+     "n": 18,
+     "hit1": 9,
+     "hit3": 13,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 3,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "C": {
+    "dev": {
+     "n": 18,
+     "hit1": 8,
+     "hit3": 14,
+     "evidence_split": 0,
+     "filter_q": 3,
+     "filter_ok": 3
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 4,
+     "evidence_split": 0,
+     "filter_q": 1,
+     "filter_ok": 1
+    }
+   }
+  },
+  "minilm": {
+   "F": {
+    "dev": {
+     "n": 18,
+     "hit1": 5,
+     "hit3": 7,
+     "evidence_split": 2,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 0,
+     "hit3": 0,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "A": {
+    "dev": {
+     "n": 18,
+     "hit1": 4,
+     "hit3": 9,
+     "evidence_split": 2,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 0,
+     "hit3": 1,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "D": {
+    "dev": {
+     "n": 18,
+     "hit1": 6,
+     "hit3": 10,
+     "evidence_split": 2,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 1,
+     "hit3": 2,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "B": {
+    "dev": {
+     "n": 18,
+     "hit1": 8,
+     "hit3": 12,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 2,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "S": {
+    "dev": {
+     "n": 18,
+     "hit1": 6,
+     "hit3": 9,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 0,
+     "hit3": 3,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "L": {
+    "dev": {
+     "n": 18,
+     "hit1": 11,
+     "hit3": 13,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 1,
+     "hit3": 3,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "C": {
+    "dev": {
+     "n": 18,
+     "hit1": 8,
+     "hit3": 12,
+     "evidence_split": 0,
+     "filter_q": 3,
+     "filter_ok": 3
+    },
+    "test": {
+     "n": 6,
+     "hit1": 3,
+     "hit3": 3,
+     "evidence_split": 0,
+     "filter_q": 1,
+     "filter_ok": 1
+    }
+   }
+  },
+  "gemma": {
+   "F": {
+    "dev": {
+     "n": 18,
+     "hit1": 2,
+     "hit3": 8,
+     "evidence_split": 3,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 1,
+     "hit3": 2,
+     "evidence_split": 2,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "A": {
+    "dev": {
+     "n": 18,
+     "hit1": 5,
+     "hit3": 8,
+     "evidence_split": 3,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 4,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "D": {
+    "dev": {
+     "n": 18,
+     "hit1": 5,
+     "hit3": 13,
+     "evidence_split": 3,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 4,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "B": {
+    "dev": {
+     "n": 18,
+     "hit1": 12,
+     "hit3": 18,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 4,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "S": {
+    "dev": {
+     "n": 18,
+     "hit1": 4,
+     "hit3": 14,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 1,
+     "hit3": 4,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "L": {
+    "dev": {
+     "n": 18,
+     "hit1": 11,
+     "hit3": 14,
+     "evidence_split": 0,
+     "filter_q": 0,
+     "filter_ok": 0
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 3,
+     "evidence_split": 1,
+     "filter_q": 0,
+     "filter_ok": 0
+    }
+   },
+   "C": {
+    "dev": {
+     "n": 18,
+     "hit1": 12,
+     "hit3": 18,
+     "evidence_split": 0,
+     "filter_q": 3,
+     "filter_ok": 3
+    },
+    "test": {
+     "n": 6,
+     "hit1": 2,
+     "hit3": 4,
+     "evidence_split": 1,
+     "filter_q": 1,
+     "filter_ok": 1
+    }
+   }
+  }
+ },
+ "chunk_stats": {
+  "F": {
+   "chunks": 2152,
+   "chars_total": 931478,
+   "len_min": 2,
+   "len_median": 500,
+   "len_mean": 432.8,
+   "len_max": 500
+  },
+  "A": {
+   "chunks": 2283,
+   "chars_total": 1016828,
+   "len_min": 51,
+   "len_median": 500,
+   "len_mean": 445.4,
+   "len_max": 500
+  },
+  "D": {
+   "chunks": 1487,
+   "chars_total": 1004232,
+   "len_min": 88,
+   "len_median": 760,
+   "len_mean": 675.3,
+   "len_max": 881
+  },
+  "B": {
+   "chunks": 1212,
+   "chars_total": 989077,
+   "len_min": 41,
+   "len_median": 898,
+   "len_mean": 816.1,
+   "len_max": 1321
+  },
+  "S": {
+   "chunks": 1280,
+   "chars_total": 930774,
+   "len_min": 4,
+   "len_median": 783,
+   "len_mean": 727.2,
+   "len_max": 1834
+  },
+  "L": {
+   "chunks": 1595,
+   "chars_total": 999354,
+   "len_min": 1,
+   "len_median": 747,
+   "len_mean": 626.6,
+   "len_max": 1195
+  }
+ },
+ "ingest": {
+  "bge": {
+   "model": "BAAI/bge-small-en-v1.5",
+   "dimensions": 384,
+   "device": "mps",
+   "run_at": "2026-11-14T03:54:25+00:00",
+   "vector_store": "PostgreSQL 16 + pgvector 0.8.7, exact cosine (no ANN index)",
+   "cost_usd": 0.0,
+   "strategies": {
+    "F": {
+     "chunks": 2152,
+     "embed_seconds": 6.8,
+     "store_seconds": 5.0,
+     "first_upsert": {
+      "inserted_or_updated": 2152,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 2152
+    },
+    "A": {
+     "chunks": 2283,
+     "embed_seconds": 7.5,
+     "store_seconds": 6.8,
+     "first_upsert": {
+      "inserted_or_updated": 2283,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 2283
+    },
+    "D": {
+     "chunks": 1487,
+     "embed_seconds": 5.9,
+     "store_seconds": 2.0,
+     "first_upsert": {
+      "inserted_or_updated": 1487,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1487
+    },
+    "B": {
+     "chunks": 1212,
+     "embed_seconds": 6.0,
+     "store_seconds": 3.0,
+     "first_upsert": {
+      "inserted_or_updated": 1212,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1212
+    },
+    "S": {
+     "chunks": 1280,
+     "embed_seconds": 5.8,
+     "store_seconds": 2.9,
+     "first_upsert": {
+      "inserted_or_updated": 1280,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1280
+    },
+    "L": {
+     "chunks": 1595,
+     "embed_seconds": 6.7,
+     "store_seconds": 2.4,
+     "first_upsert": {
+      "inserted_or_updated": 1595,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1595
+    }
+   }
+  },
+  "minilm": {
+   "model": "sentence-transformers/all-MiniLM-L6-v2",
+   "dimensions": 384,
+   "device": "mps",
+   "run_at": "2026-11-14T03:57:56+00:00",
+   "vector_store": "PostgreSQL 16 + pgvector 0.8.7, exact cosine (no ANN index)",
+   "cost_usd": 0.0,
+   "strategies": {
+    "F": {
+     "chunks": 2152,
+     "embed_seconds": 3.3,
+     "store_seconds": 2.9,
+     "first_upsert": {
+      "inserted_or_updated": 2152,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 2152
+    },
+    "A": {
+     "chunks": 2283,
+     "embed_seconds": 3.9,
+     "store_seconds": 2.7,
+     "first_upsert": {
+      "inserted_or_updated": 2283,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 2283
+    },
+    "D": {
+     "chunks": 1487,
+     "embed_seconds": 3.7,
+     "store_seconds": 1.6,
+     "first_upsert": {
+      "inserted_or_updated": 1487,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1487
+    },
+    "B": {
+     "chunks": 1212,
+     "embed_seconds": 2.9,
+     "store_seconds": 2.2,
+     "first_upsert": {
+      "inserted_or_updated": 1212,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1212
+    },
+    "S": {
+     "chunks": 1280,
+     "embed_seconds": 3.7,
+     "store_seconds": 1.2,
+     "first_upsert": {
+      "inserted_or_updated": 1280,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1280
+    },
+    "L": {
+     "chunks": 1595,
+     "embed_seconds": 3.9,
+     "store_seconds": 1.8,
+     "first_upsert": {
+      "inserted_or_updated": 1595,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1595
+    }
+   }
+  },
+  "gemma": {
+   "model": "google/embeddinggemma-300m",
+   "dimensions": 768,
+   "device": "mps",
+   "run_at": "2026-11-14T04:02:54+00:00",
+   "vector_store": "PostgreSQL 16 + pgvector 0.8.7, exact cosine (no ANN index)",
+   "cost_usd": 0.0,
+   "strategies": {
+    "F": {
+     "chunks": 2152,
+     "embed_seconds": 53.2,
+     "store_seconds": 5.4,
+     "first_upsert": {
+      "inserted_or_updated": 2152,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 2152
+    },
+    "A": {
+     "chunks": 2283,
+     "embed_seconds": 69.3,
+     "store_seconds": 10.3,
+     "first_upsert": {
+      "inserted_or_updated": 2283,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 2283
+    },
+    "D": {
+     "chunks": 1487,
+     "embed_seconds": 65.5,
+     "store_seconds": 6.6,
+     "first_upsert": {
+      "inserted_or_updated": 1487,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1487
+    },
+    "B": {
+     "chunks": 1212,
+     "embed_seconds": 71.3,
+     "store_seconds": 3.4,
+     "first_upsert": {
+      "inserted_or_updated": 1212,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1212
+    },
+    "S": {
+     "chunks": 1280,
+     "embed_seconds": 67.7,
+     "store_seconds": 6.0,
+     "first_upsert": {
+      "inserted_or_updated": 1280,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1280
+    },
+    "L": {
+     "chunks": 1595,
+     "embed_seconds": 69.8,
+     "store_seconds": 20.4,
+     "first_upsert": {
+      "inserted_or_updated": 1595,
+      "deleted_stale": 0
+     },
+     "reingest_same_version": {
+      "inserted_or_updated": 0,
+      "deleted_stale": 0
+     },
+     "rows_in_store": 1595
+    }
+   }
+  }
+ },
+ "manual_bge": {
+  "F": {
+   "coherence_mean": 0.1,
+   "coherence_n": 10,
+   "grounding_counts": [
+    1,
+    3,
+    2
+   ],
+   "grounding_mean": 1.17,
+   "metadata_ok": 14,
+   "metadata_n": 18
+  },
+  "A": {
+   "coherence_mean": 0.1,
+   "coherence_n": 10,
+   "grounding_counts": [
+    1,
+    1,
+    4
+   ],
+   "grounding_mean": 1.5,
+   "metadata_ok": 12,
+   "metadata_n": 18
+  },
+  "D": {
+   "coherence_mean": 0.8,
+   "coherence_n": 10,
+   "grounding_counts": [
+    1,
+    1,
+    4
+   ],
+   "grounding_mean": 1.5,
+   "metadata_ok": 14,
+   "metadata_n": 18
+  },
+  "B": {
+   "coherence_mean": 1.6,
+   "coherence_n": 10,
+   "grounding_counts": [
+    1,
+    1,
+    4
+   ],
+   "grounding_mean": 1.5,
+   "metadata_ok": 18,
+   "metadata_n": 18
+  },
+  "S": {
+   "coherence_mean": 1.6,
+   "coherence_n": 10,
+   "grounding_counts": [
+    2,
+    0,
+    4
+   ],
+   "grounding_mean": 1.33,
+   "metadata_ok": 14,
+   "metadata_n": 18
+  },
+  "L": {
+   "coherence_mean": 0.8,
+   "coherence_n": 10,
+   "grounding_counts": [
+    1,
+    2,
+    3
+   ],
+   "grounding_mean": 1.33,
+   "metadata_ok": 12,
+   "metadata_n": 18
+  },
+  "C": {
+   "coherence_mean": 1.6,
+   "coherence_n": 10,
+   "grounding_counts": [
+    1,
+    1,
+    4
+   ],
+   "grounding_mean": 1.5,
+   "metadata_ok": 18,
+   "metadata_n": 18
+  }
+ },
+ "llm_chunking": {
+  "model": "claude-haiku-5-5",
+  "pages": 30,
+  "tokens": {
+   "input": 19206,
+   "output": 2208,
+   "cache_read": 34590,
+   "cache_write": 0
+  },
+  "cost_usd_estimate": 0.0034,
+  "seconds_this_run": 13.1,
+  "price_note": "Haiku 5.5 $0.10/M input, $0.50/M output; cache write 1.25x, cache read 0.1x of input"
+ }
+}

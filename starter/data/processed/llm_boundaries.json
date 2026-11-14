@@ -1,0 +1,514 @@
+{
+ "model": "claude-haiku-5-5",
+ "pages": {
+  "eu-ai-act-2024:26": {
+   "key": "eu-ai-act-2024:26",
+   "starts": [
+    6,
+    12
+   ],
+   "usage": {
+    "input": 510,
+    "output": 14,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:31": {
+   "key": "eu-ai-act-2024:31",
+   "starts": [
+    7,
+    18
+   ],
+   "usage": {
+    "input": 623,
+    "output": 14,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:116": {
+   "key": "eu-ai-act-2024:116",
+   "starts": [
+    11,
+    17
+   ],
+   "usage": {
+    "input": 546,
+    "output": 14,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:166": {
+   "key": "eu-ai-act-2024:166",
+   "starts": [
+    3,
+    8,
+    10
+   ],
+   "usage": {
+    "input": 336,
+    "output": 17,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:180": {
+   "key": "eu-ai-act-2024:180",
+   "starts": [
+    3,
+    7,
+    11,
+    12
+   ],
+   "usage": {
+    "input": 451,
+    "output": 20,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:187": {
+   "key": "eu-ai-act-2024:187",
+   "starts": [
+    11
+   ],
+   "usage": {
+    "input": 599,
+    "output": 172,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:233": {
+   "key": "eu-ai-act-2024:233",
+   "starts": [
+    4,
+    7,
+    8,
+    9,
+    12,
+    15
+   ],
+   "usage": {
+    "input": 467,
+    "output": 26,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:255": {
+   "key": "eu-ai-act-2024:255",
+   "starts": [
+    2,
+    4,
+    7,
+    9,
+    12,
+    14
+   ],
+   "usage": {
+    "input": 338,
+    "output": 26,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:282": {
+   "key": "eu-ai-act-2024:282",
+   "starts": [
+    1,
+    3,
+    5
+   ],
+   "usage": {
+    "input": 341,
+    "output": 17,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:284": {
+   "key": "eu-ai-act-2024:284",
+   "starts": [
+    8
+   ],
+   "usage": {
+    "input": 406,
+    "output": 11,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:287": {
+   "key": "eu-ai-act-2024:287",
+   "starts": [
+    3,
+    8,
+    9,
+    10
+   ],
+   "usage": {
+    "input": 441,
+    "output": 20,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:289": {
+   "key": "eu-ai-act-2024:289",
+   "starts": [
+    5,
+    9
+   ],
+   "usage": {
+    "input": 370,
+    "output": 14,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:301": {
+   "key": "eu-ai-act-2024:301",
+   "starts": [
+    2,
+    4,
+    10
+   ],
+   "usage": {
+    "input": 290,
+    "output": 17,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:347": {
+   "key": "eu-ai-act-2024:347",
+   "starts": [
+    2,
+    4,
+    7,
+    8,
+    14
+   ],
+   "usage": {
+    "input": 406,
+    "output": 23,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:391": {
+   "key": "eu-ai-act-2024:391",
+   "starts": [
+    4,
+    8,
+    13
+   ],
+   "usage": {
+    "input": 433,
+    "output": 17,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:416": {
+   "key": "eu-ai-act-2024:416",
+   "starts": [
+    4,
+    5,
+    6
+   ],
+   "usage": {
+    "input": 147,
+    "output": 17,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:425": {
+   "key": "eu-ai-act-2024:425",
+   "starts": [
+    4,
+    7,
+    10,
+    13
+   ],
+   "usage": {
+    "input": 363,
+    "output": 20,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "eu-ai-act-2024:426": {
+   "key": "eu-ai-act-2024:426",
+   "starts": [
+    1,
+    4,
+    5,
+    9,
+    11,
+    15
+   ],
+   "usage": {
+    "input": 435,
+    "output": 26,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:12": {
+   "key": "gdpr-2016:12",
+   "starts": [
+    15,
+    25
+   ],
+   "usage": {
+    "input": 1097,
+    "output": 14,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:24": {
+   "key": "gdpr-2016:24",
+   "starts": [
+    6,
+    18,
+    34
+   ],
+   "usage": {
+    "input": 1133,
+    "output": 17,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:48": {
+   "key": "gdpr-2016:48",
+   "starts": [
+    2,
+    5,
+    10,
+    12,
+    17,
+    23,
+    25,
+    31,
+    33,
+    40
+   ],
+   "usage": {
+    "input": 1055,
+    "output": 38,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:53": {
+   "key": "gdpr-2016:53",
+   "starts": [
+    8,
+    12,
+    18,
+    23,
+    27,
+    37,
+    40
+   ],
+   "usage": {
+    "input": 933,
+    "output": 471,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:54": {
+   "key": "gdpr-2016:54",
+   "starts": [
+    1,
+    2,
+    7,
+    8,
+    12,
+    19,
+    22,
+    30,
+    32,
+    34,
+    38
+   ],
+   "usage": {
+    "input": 963,
+    "output": 41,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:56": {
+   "key": "gdpr-2016:56",
+   "starts": [
+    2,
+    3,
+    4,
+    6,
+    15,
+    20,
+    29,
+    34,
+    39
+   ],
+   "usage": {
+    "input": 961,
+    "output": 35,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:61": {
+   "key": "gdpr-2016:61",
+   "starts": [
+    4,
+    6,
+    7,
+    8,
+    13,
+    14,
+    18,
+    23,
+    26,
+    27,
+    30,
+    32,
+    39
+   ],
+   "usage": {
+    "input": 897,
+    "output": 47,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:63": {
+   "key": "gdpr-2016:63",
+   "starts": [
+    2,
+    12,
+    15,
+    19,
+    21,
+    31,
+    35,
+    37
+   ],
+   "usage": {
+    "input": 922,
+    "output": 419,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:70": {
+   "key": "gdpr-2016:70",
+   "starts": [
+    2,
+    3,
+    6,
+    10,
+    11,
+    15,
+    16,
+    18,
+    21,
+    27,
+    31,
+    32,
+    33
+   ],
+   "usage": {
+    "input": 893,
+    "output": 47,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:71": {
+   "key": "gdpr-2016:71",
+   "starts": [
+    7,
+    11,
+    15,
+    20,
+    28,
+    30
+   ],
+   "usage": {
+    "input": 962,
+    "output": 506,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:75": {
+   "key": "gdpr-2016:75",
+   "starts": [
+    6,
+    11,
+    12,
+    13,
+    15,
+    17,
+    20,
+    23,
+    25,
+    28,
+    30,
+    33
+   ],
+   "usage": {
+    "input": 850,
+    "output": 44,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  },
+  "gdpr-2016:111": {
+   "key": "gdpr-2016:111",
+   "starts": [
+    2,
+    4,
+    8,
+    11,
+    13,
+    16,
+    19,
+    22,
+    24,
+    26,
+    30,
+    35
+   ],
+   "usage": {
+    "input": 1038,
+    "output": 44,
+    "cache_read": 1153,
+    "cache_write": 0
+   }
+  }
+ },
+ "summary": {
+  "model": "claude-haiku-5-5",
+  "pages": 30,
+  "tokens": {
+   "input": 19206,
+   "output": 2208,
+   "cache_read": 34590,
+   "cache_write": 0
+  },
+  "cost_usd_estimate": 0.0034,
+  "seconds_this_run": 13.1,
+  "price_note": "Haiku 5.5 $0.10/M input, $0.50/M output; cache write 1.25x, cache read 0.1x of input"
+ }
+}

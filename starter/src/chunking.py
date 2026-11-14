@@ -189,3 +189,73 @@ def structure_aware(pages: list[DocumentPage], max_size: int) -> list[Chunk]:
 
 def content_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+# ---------------------------------------------------------------- F: fixed size, no overlap
+def fixed_no_overlap(page: DocumentPage, size: int) -> list[Chunk]:
+    out = []
+    for i, start in enumerate(range(0, len(page.text), size)):
+        out.append(Chunk(chunk_id=_cid("F", page.document_id, f"p{page.page}", i), document_id=page.document_id,
+                         source=page.source, page=page.page, text=page.text[start:start + size],
+                         metadata=_meta(page, page_end=page.page, char_start=start)))
+    return out
+
+
+# ---------------------------------------------------------------- S: semantic (embedding similarity breaks)
+_SENT = re.compile(r"(?<=[.;:])\s+(?=[A-Z(‘'\"\d])|\n(?=\(?\d+[.)]\s|\([a-z]\)\s|Article\s|CHAPTER|Chapter|ANNEX)")
+
+
+def split_sentences(text: str) -> list[str]:
+    return [s.strip() for s in _SENT.split(text) if s and s.strip()]
+
+
+def semantic(pages: list[DocumentPage], embed_fn, max_size: int, min_size: int, percentile: float) -> list[Chunk]:
+    """Per page: embed sentences, cut where similarity to the next sentence is in the lowest `percentile`
+    of the document (or when max_size would be exceeded); never cut below min_size."""
+    import numpy as np
+
+    sents_per_page = [(p, split_sentences(p.text)) for p in pages]
+    flat = [s for _, ss in sents_per_page for s in ss]
+    vecs = np.asarray(embed_fn(flat))
+    sims, k = [], 0
+    for _, ss in sents_per_page:
+        v = vecs[k:k + len(ss)]
+        sims.append([float(v[i] @ v[i + 1]) for i in range(len(ss) - 1)])
+        k += len(ss)
+    all_s = [x for s in sims for x in s]
+    thresh = float(np.percentile(all_s, percentile)) if all_s else 0.0
+    out = []
+    for (p, ss), sim in zip(sents_per_page, sims):
+        buf, idx = "", 0
+        for i, s in enumerate(ss):
+            cand = (buf + " " + s).strip() if buf else s
+            if buf and len(cand) > max_size:
+                out.append(Chunk(_cid("S", p.document_id, f"p{p.page}", idx), p.document_id, p.source, p.page, buf,
+                                 _meta(p, page_end=p.page))); idx += 1; buf = s
+                continue
+            buf = cand
+            if i < len(sim) and sim[i] < thresh and len(buf) >= min_size:
+                out.append(Chunk(_cid("S", p.document_id, f"p{p.page}", idx), p.document_id, p.source, p.page, buf,
+                                 _meta(p, page_end=p.page))); idx += 1; buf = ""
+        if buf:
+            out.append(Chunk(_cid("S", p.document_id, f"p{p.page}", idx), p.document_id, p.source, p.page, buf,
+                             _meta(p, page_end=p.page)))
+    return out
+
+
+# ---------------------------------------------------------------- L: agentic / LLM-chosen breakpoints
+def llm_chunks(pages: list[DocumentPage], boundaries: dict[str, list[int]], max_size: int) -> list[Chunk]:
+    """Cut each page at the line numbers an LLM chose (see src/llm_chunker.py); oversized pieces are split again."""
+    out = []
+    for p in pages:
+        lines = p.text.split("\n")
+        starts = sorted({0, *[b for b in boundaries.get(f"{p.document_id}:{p.page}", []) if 0 < b < len(lines)]})
+        idx = 0
+        for a, b in zip(starts, starts[1:] + [len(lines)]):
+            piece = "\n".join(lines[a:b]).strip()
+            if not piece:
+                continue
+            for sub in (_recursive_split(piece, max_size, _SEPARATORS) if len(piece) > max_size else [piece]):
+                out.append(Chunk(_cid("L", p.document_id, f"p{p.page}", idx), p.document_id, p.source, p.page, sub,
+                                 _meta(p, page_end=p.page, line_start=a))); idx += 1
+    return out

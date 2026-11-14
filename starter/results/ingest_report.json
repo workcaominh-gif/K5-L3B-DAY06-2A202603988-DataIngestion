@@ -1,0 +1,336 @@
+{
+  "models": {
+    "bge": {
+      "model": "BAAI/bge-small-en-v1.5",
+      "dimensions": 384,
+      "device": "mps",
+      "run_at": "2026-11-14T03:54:25+00:00",
+      "vector_store": "PostgreSQL 16 + pgvector 0.8.7, exact cosine (no ANN index)",
+      "cost_usd": 0.0,
+      "strategies": {
+        "F": {
+          "chunks": 2152,
+          "embed_seconds": 6.8,
+          "store_seconds": 5.0,
+          "first_upsert": {
+            "inserted_or_updated": 2152,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 2152
+        },
+        "A": {
+          "chunks": 2283,
+          "embed_seconds": 7.5,
+          "store_seconds": 6.8,
+          "first_upsert": {
+            "inserted_or_updated": 2283,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 2283
+        },
+        "D": {
+          "chunks": 1487,
+          "embed_seconds": 5.9,
+          "store_seconds": 2.0,
+          "first_upsert": {
+            "inserted_or_updated": 1487,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1487
+        },
+        "B": {
+          "chunks": 1212,
+          "embed_seconds": 6.0,
+          "store_seconds": 3.0,
+          "first_upsert": {
+            "inserted_or_updated": 1212,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1212
+        },
+        "S": {
+          "chunks": 1280,
+          "embed_seconds": 5.8,
+          "store_seconds": 2.9,
+          "first_upsert": {
+            "inserted_or_updated": 1280,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1280
+        },
+        "L": {
+          "chunks": 1595,
+          "embed_seconds": 6.7,
+          "store_seconds": 2.4,
+          "first_upsert": {
+            "inserted_or_updated": 1595,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1595
+        }
+      }
+    },
+    "minilm": {
+      "model": "sentence-transformers/all-MiniLM-L6-v2",
+      "dimensions": 384,
+      "device": "mps",
+      "run_at": "2026-11-14T03:57:56+00:00",
+      "vector_store": "PostgreSQL 16 + pgvector 0.8.7, exact cosine (no ANN index)",
+      "cost_usd": 0.0,
+      "strategies": {
+        "F": {
+          "chunks": 2152,
+          "embed_seconds": 3.3,
+          "store_seconds": 2.9,
+          "first_upsert": {
+            "inserted_or_updated": 2152,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 2152
+        },
+        "A": {
+          "chunks": 2283,
+          "embed_seconds": 3.9,
+          "store_seconds": 2.7,
+          "first_upsert": {
+            "inserted_or_updated": 2283,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 2283
+        },
+        "D": {
+          "chunks": 1487,
+          "embed_seconds": 3.7,
+          "store_seconds": 1.6,
+          "first_upsert": {
+            "inserted_or_updated": 1487,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1487
+        },
+        "B": {
+          "chunks": 1212,
+          "embed_seconds": 2.9,
+          "store_seconds": 2.2,
+          "first_upsert": {
+            "inserted_or_updated": 1212,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1212
+        },
+        "S": {
+          "chunks": 1280,
+          "embed_seconds": 3.7,
+          "store_seconds": 1.2,
+          "first_upsert": {
+            "inserted_or_updated": 1280,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1280
+        },
+        "L": {
+          "chunks": 1595,
+          "embed_seconds": 3.9,
+          "store_seconds": 1.8,
+          "first_upsert": {
+            "inserted_or_updated": 1595,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1595
+        }
+      }
+    },
+    "gemma": {
+      "model": "google/embeddinggemma-300m",
+      "dimensions": 768,
+      "device": "mps",
+      "run_at": "2026-11-14T04:02:54+00:00",
+      "vector_store": "PostgreSQL 16 + pgvector 0.8.7, exact cosine (no ANN index)",
+      "cost_usd": 0.0,
+      "strategies": {
+        "F": {
+          "chunks": 2152,
+          "embed_seconds": 53.2,
+          "store_seconds": 5.4,
+          "first_upsert": {
+            "inserted_or_updated": 2152,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 2152
+        },
+        "A": {
+          "chunks": 2283,
+          "embed_seconds": 69.3,
+          "store_seconds": 10.3,
+          "first_upsert": {
+            "inserted_or_updated": 2283,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 2283
+        },
+        "D": {
+          "chunks": 1487,
+          "embed_seconds": 65.5,
+          "store_seconds": 6.6,
+          "first_upsert": {
+            "inserted_or_updated": 1487,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1487
+        },
+        "B": {
+          "chunks": 1212,
+          "embed_seconds": 71.3,
+          "store_seconds": 3.4,
+          "first_upsert": {
+            "inserted_or_updated": 1212,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1212
+        },
+        "S": {
+          "chunks": 1280,
+          "embed_seconds": 67.7,
+          "store_seconds": 6.0,
+          "first_upsert": {
+            "inserted_or_updated": 1280,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1280
+        },
+        "L": {
+          "chunks": 1595,
+          "embed_seconds": 69.8,
+          "store_seconds": 20.4,
+          "first_upsert": {
+            "inserted_or_updated": 1595,
+            "deleted_stale": 0
+          },
+          "reingest_same_version": {
+            "inserted_or_updated": 0,
+            "deleted_stale": 0
+          },
+          "rows_in_store": 1595
+        }
+      }
+    }
+  },
+  "chunk_stats": {
+    "F": {
+      "chunks": 2152,
+      "chars_total": 931478,
+      "len_min": 2,
+      "len_median": 500,
+      "len_mean": 432.8,
+      "len_max": 500
+    },
+    "A": {
+      "chunks": 2283,
+      "chars_total": 1016828,
+      "len_min": 51,
+      "len_median": 500,
+      "len_mean": 445.4,
+      "len_max": 500
+    },
+    "D": {
+      "chunks": 1487,
+      "chars_total": 1004232,
+      "len_min": 88,
+      "len_median": 760,
+      "len_mean": 675.3,
+      "len_max": 881
+    },
+    "B": {
+      "chunks": 1212,
+      "chars_total": 989077,
+      "len_min": 41,
+      "len_median": 898,
+      "len_mean": 816.1,
+      "len_max": 1321
+    },
+    "S": {
+      "chunks": 1280,
+      "chars_total": 930774,
+      "len_min": 4,
+      "len_median": 783,
+      "len_mean": 727.2,
+      "len_max": 1834
+    },
+    "L": {
+      "chunks": 1595,
+      "chars_total": 999354,
+      "len_min": 1,
+      "len_median": 747,
+      "len_mean": 626.6,
+      "len_max": 1195
+    }
+  }
+}
