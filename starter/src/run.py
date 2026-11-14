@@ -34,6 +34,7 @@ PROCESSED = ROOT / "data" / "processed"
 RESULTS = ROOT / "results"
 BENCH = REPO / "benchmark" / "questions.jsonl"
 CONFIG = REPO / "configs" / "strategies.json"
+MIN_CONTENT_CHARS = 300
 
 
 def _now() -> str:
@@ -58,9 +59,8 @@ def load_corpus(errors: list[dict]) -> list[DocumentPage]:
         base = {"regulation": doc["regulation"], "regulation_short": doc["regulation_short"], "year": doc["year"],
                 "document_type": doc["document_type"]}
         doc_pages = load_pdf(path, doc["source_id"], doc["source_path_or_url"], base, errors)
-        counted = set(doc.get("counted_pages", []))
-        for p in doc_pages:
-            p.metadata["counted_as_content"] = (p.page in counted) if counted else True
+        for p in doc_pages:                        # rule from data/manifest.json
+            p.metadata["counted_as_content"] = p.metadata["char_count"] >= MIN_CONTENT_CHARS
         pages.extend(doc_pages)
     return pages
 
@@ -80,10 +80,16 @@ def cmd_inspect() -> None:
     for p in pages:
         by_doc.setdefault(p.document_id, []).append(p)
     print(f"read {len(pages)} pages with text in {time.perf_counter() - t0:.1f}s; {len(errors)} extraction issues")
+    stats = {"run_at": _now(), "rule": f">= {MIN_CONTENT_CHARS} normalized chars", "documents": {}}
     for d, ps in by_doc.items():
         counted = [p for p in ps if p.metadata["counted_as_content"]]
+        stats["documents"][d] = {"pages_with_text": len(ps), "content_pages": len(counted),
+                                 "content_page_ids": [p.page for p in counted],
+                                 "excluded_page_ids": [p.page for p in ps if not p.metadata["counted_as_content"]],
+                                 "chars": sum(len(p.text) for p in ps)}
         parts = {k: sum(1 for p in ps if p.metadata['part'] == k) for k in ("recital", "article", "annex")}
         print(f"  {d}: {len(ps)} pages, counted as content {len(counted)}, chars {sum(len(p.text) for p in ps)}, parts {parts}")
+    (RESULTS / "corpus_stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def build_chunks(pages: list[DocumentPage], cfg: dict) -> dict[str, list[Chunk]]:

@@ -1,0 +1,38 @@
+{
+  "corpus": "EU AI regulation and data protection: AI Act (European Parliament text adopted 13 March 2024) + GDPR",
+  "page_counting_rule": "A physical PDF page counts as a content page when its normalized text has >= 300 characters (drops cover/blank/footnote-only pages). Counts are computed by `python -m src.run inspect` and written to results/corpus_stats.json.",
+  "documents": [
+    {
+      "source_id": "eu-ai-act-2024",
+      "title": "Artificial Intelligence Act — European Parliament legislative resolution of 13 March 2024 (P9_TA(2024)0138), position at first reading incl. Annexes",
+      "regulation": "Artificial Intelligence Act (Regulation (EU) 2024/1689, EP adopted text)",
+      "regulation_short": "AI Act",
+      "document_type": "regulation_ep_adopted_text",
+      "year": 2024,
+      "source_path_or_url": "https://www.europarl.europa.eu/doceo/document/TA-9-2024-0138_EN.pdf (URL inferred from the downloaded file name TA-9-2024-0138_EN.pdf; European Parliament 'Texts adopted' series)",
+      "local_path": "data/raw/eu-ai-act-ep-2024-0138.pdf",
+      "sha256": "51eb24c14b4e2d27398fd8640f8294a583a86d7aac58156e51bf9081d3bba058",
+      "physical_pages": 459,
+      "license_or_permission": "European Parliament legal notice: reproduction is authorised, provided the source is acknowledged. Official EU legislative text.",
+      "accessed_at": "2026-11-14",
+      "version_note": "This is the Parliament's adopted text (corrigendum-pending, numbering may differ slightly from the Official Journal version published 12 July 2024). Not the OJ consolidated version: EUR-Lex was in maintenance at download time.",
+      "obtained_by": "Downloaded manually by the student in a browser on 2026-11-14 (EUR-Lex unavailable)."
+    },
+    {
+      "source_id": "gdpr-2016",
+      "title": "General Data Protection Regulation (GDPR) — full text, Regulation (EU) 2016/679",
+      "regulation": "General Data Protection Regulation (Regulation (EU) 2016/679)",
+      "regulation_short": "GDPR",
+      "document_type": "regulation_consolidated_third_party_layout",
+      "year": 2016,
+      "source_path_or_url": "Third-party LaTeX layout of the official text (PDF metadata: 'General Data Protection Regulation (GDPR) - full text', created 2019-04-24); official source: https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "local_path": "data/raw/gdpr-2016-679.pdf",
+      "sha256": "8b0cb0aacf8061c3b595cdb7e4fac00943de7ce0846294b3b2a1ec60dd645a89",
+      "physical_pages": 117,
+      "license_or_permission": "Text of an EU legal act: reuse authorised with acknowledgement (Commission Decision 2011/833/EU). The layout is a third-party compilation of that text; the publisher is not identified in the PDF, so the PDF itself is not redistributed in this repo.",
+      "accessed_at": "2026-11-14",
+      "version_note": "Original 2016 text as published in OJ L 119, 4.5.2016 (incl. recitals 1-173, Articles 1-99). The 2018 corrigendum is not reflected unless the layout included it: not verified.",
+      "obtained_by": "Downloaded manually by the student in a browser on 2026-11-14."
+    }
+  ]
+}

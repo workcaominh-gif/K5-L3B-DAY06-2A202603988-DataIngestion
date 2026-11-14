@@ -29,21 +29,34 @@ _NOISE_LINES = [
     re.compile(r"^EN\s+\d+/\d+\s*$"),
 ]
 
-_CHAPTER = re.compile(r"^CHAPTER\s+([IVXLC]+)\b")
-_ARTICLE = re.compile(r"^Article\s+(\d+[a-z]?)\s*$")
+_CHAPTER = re.compile(r"^(?:CHAPTER|Chapter)\s+([IVXLC]+)\b")
+# "Article 60" (title on next line, EP text) or "Article 16 Right to rectification" (title inline, GDPR);
+# lines like "Article 5 shall apply ..." are cross-references, not headings.
+_ARTICLE = re.compile(r"^Article\s+(\d+[a-z]?)(?:\s+([A-Z][^.]{2,110}))?\s*$")
 _ANNEX = re.compile(r"^ANNEX\s+([IVXLC]+)\b")
 _ENACTING = re.compile(r"^HAVE ADOPTED THIS REGULATION", re.I)
+
+
+LIGATURES = {"\ufb00": "ff", "\ufb01": "fi", "\ufb02": "fl", "\ufb03": "ffi", "\ufb04": "ffl"}
 
 
 def normalize_text(text: str) -> str:
     """NFC-normalize, repair PDF line-break hyphenation and spacing, keep paragraph breaks."""
     text = unicodedata.normalize("NFC", text)
+    for lig, rep in LIGATURES.items():                       # NFC keeps ﬁ/ﬂ ligatures: expand them
+        text = text.replace(lig, rep)
+    text = text.replace("▌", "")                       # "▌" change bars in the EP text
     text = text.replace("­", "")                       # soft hyphen
     text = text.replace(" ", " ").replace(" ", " ")
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"(\w)-\n(\w)", r"\1\2", text)            # word-\nbreak -> wordbreak
     lines = [ln.strip() for ln in text.split("\n")]
     lines = [ln for ln in lines if ln and not any(p.match(ln) for p in _NOISE_LINES)]
+    # a bare number as the first or last line is a page number, not content
+    if lines and re.fullmatch(r"\d{1,3}", lines[-1]):
+        lines = lines[:-1]
+    if lines and re.fullmatch(r"\d{1,3}", lines[0]):
+        lines = lines[1:]
     return "\n".join(lines).strip()
 
 

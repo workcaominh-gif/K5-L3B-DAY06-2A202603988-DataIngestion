@@ -119,8 +119,9 @@ def structure_aware(pages: list[DocumentPage], max_size: int) -> list[Chunk]:
                 state.update(part="article", chapter=m.group(1), annex=None)
                 boundary = "chapter"
             elif m := _ARTICLE.match(line):
-                state.update(part="article", article=m.group(1), annex=None, article_title=None)
-                boundary, expect_title = "article", True
+                inline = m.group(2) if m.lastindex and m.lastindex >= 2 else None
+                state.update(part="article", article=m.group(1), annex=None, article_title=inline)
+                boundary, expect_title = "article", inline is None
             elif m := _ANNEX.match(line):
                 state.update(part="annex", annex=m.group(1), article=None, article_title=None)
                 boundary = "annex"
