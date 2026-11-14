@@ -70,7 +70,7 @@ mark{background:#ffe08a;border-radius:3px}
 .why p{font-size:13.5px;margin:6px 0}.mini{font-size:12.5px}.mini tr.me td{background:#f3f6fb;font-weight:600}
 .tp{border-radius:9px;padding:7px 9px;margin-top:6px;background:#f6f7f9;font-size:12.5px}.tp.ok{box-shadow:inset 3px 0 0 var(--g);background:var(--gb)}.tp.part{box-shadow:inset 3px 0 0 #d9a400;background:#fff6e0}
 .zb button,.mbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font:inherit;font-size:14px;cursor:pointer}.mbtn.on{background:var(--b);color:#fff;border-color:var(--b)}
-.box{max-width:820px}.box.wide{max-width:96vw}.mgrid{display:grid;gap:16px}.mcell{min-width:0}.mcell+.mcell{border-left:1px solid var(--line);padding-left:16px}.mck{display:inline-flex;align-items:center;gap:4px;font-size:14px;cursor:pointer}
+.box{max-width:820px}.box.wide{max-width:96vw}details.code{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:6px 0;background:#fafbfc}details.code summary{cursor:pointer;font-weight:600;font-size:14px}details.code pre{background:#1e2329;color:#e6e9ee;border-radius:8px;padding:10px;overflow:auto;max-height:420px;font-size:12px;line-height:1.45;margin:4px 0 8px}.ct2{font:12px ui-monospace,Menlo,monospace;color:var(--mut);margin-top:6px}.mgrid{display:grid;gap:16px}.mcell{min-width:0}.mcell+.mcell{border-left:1px solid var(--line);padding-left:16px}.mck{display:inline-flex;align-items:center;gap:4px;font-size:14px;cursor:pointer}
 @media (max-width:900px){.mgrid{grid-template-columns:1fr!important}.mcell+.mcell{border-left:0;padding-left:0;border-top:1px solid var(--line)}}
 @media (max-width:700px){main,header{padding-left:16px;padding-right:16px}}
 </style></head>
@@ -237,6 +237,33 @@ function why(qid,m,k,E,R){
  // vs other models, same technique
  out.push(`<p><b>Cùng kỹ thuật ${k} trên model khác:</b> ${MK.map(mm=>{const x=R[mm].find(y=>y.k===k);return `${esc(mname(mm))}: hạng ${x.place}, ${x.ev?'bằng chứng #'+x.ev[P.rank]+' (cos '+f3(x.ev[P.cos])+')':'không có chunk chứa trọn'}`}).join(' · ')}.</p>`);
  return out.join('')}
+
+// ---------- source code shown in the ? popup (read live from starter/src, so it is the code that produced the results) ----------
+const SRC={};
+async function src(f){if(!SRC[f])SRC[f]=(await (await fetch(`../starter/src/${f}`)).text()).split('\n');return SRC[f]}
+function pyBlock(L,name){const i=L.findIndex(l=>new RegExp(`^\\s*(async\\s+)?(def|class)\\s+${name}\\b`).test(l));if(i<0)return null;
+ const ind=L[i].match(/^\s*/)[0].length;let j=i+1;
+ for(;j<L.length;j++){const l=L[j];if(!l.trim())continue;const k=l.match(/^\s*/)[0].length;if(k<=ind&&!/^\s*[)\]}]/.test(l))break}
+ while(j>i&&!L[j-1].trim())j--;return {from:i+1,to:j,code:L.slice(i,j).join('\n')}}
+function pyRange(L,start,n){const i=L.findIndex(l=>l.includes(start));return i<0?null:{from:i+1,to:i+n,code:L.slice(i,i+n).join('\n')}}
+const CODE={
+ F:[['chunking.py','fixed_no_overlap']],A:[['chunking.py','fixed_size']],D:[['chunking.py','_recursive_split'],['chunking.py','recursive']],
+ B:[['chunking.py','structure_aware']],S:[['chunking.py','split_sentences'],['chunking.py','semantic']],
+ L:[['llm_chunker.py','sample_pages'],['llm_chunker.py','_call'],['chunking.py','llm_chunks']],C:[['chunking.py','structure_aware']]};
+async function codeBlocks(k,m){
+ const part=async(f,name)=>{const L=await src(f);const b=pyBlock(L,name);return b?{t:`starter/src/${f}:${b.from}–${b.to} · ${name}`,c:b.code}:null};
+ const chunk=(await Promise.all(CODE[k].map(([f,n])=>part(f,n)))).filter(Boolean);
+ const R=await src('run.py');const call=pyRange(R,'out["'+(k==='C'?'B':k)+'"].extend(',1);
+ if(call)chunk.unshift({t:`starter/src/run.py:${call.from} · cách gọi cho ${k==='C'?'B (C dùng lại index B)':k}`,c:call.code});
+ const emb=[await part('embeddings.py','MyEmbedder')].filter(Boolean);
+ const st=await part('store.py','search');const ev=pyRange(R,'qvecs = {q["id"]: emb.embed_query',8);
+ const qry=[ev&&{t:`starter/src/run.py:${ev.from}–${ev.to} · embed câu hỏi rồi tìm (C: filters = lọc part của câu hỏi)`,c:ev.code},st].filter(Boolean);
+ const cfg=D.strategies.find(x=>x.key===k).config;const mm=D.models.find(x=>x.key===m)||{};
+ const mode=/bge/i.test(mm.name)?'BGE: câu hỏi thêm tiền tố "Represent this sentence for searching relevant passages: ", chunk không thêm gì':/gemma/i.test(mm.name)?'EmbeddingGemma: encode_query / encode_document (prompt "query" / "document" có sẵn của model)':'MiniLM: không dùng prompt';
+ const box=(title,note,arr)=>`<details class="code"><summary>${title}</summary>${note?`<div class="small">${note}</div>`:''}${arr.map(b=>`<div class="ct2">${esc(b.t)}</div><pre><code>${esc(b.c)}</code></pre>`).join('')}</details>`;
+ return box('Code chunking',`Cấu hình: <code>${esc(JSON.stringify(cfg))}</code>`,chunk)+
+  box('Code embedding',`Model ${esc(mm.name||m)} · ${mm.dims||''} chiều · ${mode}. Vector chuẩn hoá L2 nên cosine = tích vô hướng.`,emb)+
+  box('Code truy vấn','PostgreSQL + pgvector, tìm chính xác theo cosine (<code>&lt;=&gt;</code> là khoảng cách cosine), lọc trong SQL trước khi xếp hạng.',qry)}
 async function openQ(ks,m){
  const qid=$('#cq')?.value||Q[0].id;ks=[].concat(ks);m=m||'bge';CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
  const order=R[m].map(r=>r.k);ks.sort((a,b)=>order.indexOf(a)-order.indexOf(b));
@@ -248,7 +275,8 @@ async function openQ(ks,m){
  <button class="btn" id="mok">OK</button></div>
  <div class="mgrid" style="grid-template-columns:repeat(${ks.length},minmax(0,1fr))">${ks.map(k=>`<div class="mcell"><div class="mh">${tag(k)} ${esc(sname(k))}</div>
   <p class="small">${EXPLAIN[k].what} ${EXPLAIN[k].how}</p>
-  <h4>Kết quả trên câu này</h4>${why(qid,m,k,E,R)}<p class="small">${bench(k)}</p><h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}</div>`).join('')}</div>`;
+  <h4>Kết quả trên câu này</h4>${why(qid,m,k,E,R)}<p class="small">${bench(k)}</p><h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}<h4>Code</h4><div id="code_${k}" class="small">Đang tải code…</div></div>`).join('')}</div>`;
+ ks.forEach(async k=>{const el=document.getElementById('code_'+k);try{el.outerHTML=await codeBlocks(k,m)}catch(e){el.textContent='Không tải được code: '+e.message}});
  $('#mok').onclick=()=>{const sel=[...document.querySelectorAll('.msel input:checked')].map(i=>i.value);if(sel.length)openQ(sel,m)};
  $('#modal').classList.add('show')}
 function renderLive(){

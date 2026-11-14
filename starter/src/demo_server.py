@@ -64,6 +64,9 @@ class Handler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     def do_GET(self):
+        path = self.path.split("?", 1)[0]
+        if any(seg.startswith(".") for seg in path.split("/") if seg):   # never serve .env, .venv, .git
+            return self.send_error(404)
         if self.path in ("/", "/index.html"):
             self.send_response(302)
             self.send_header("Location", "/demo/index.html")
