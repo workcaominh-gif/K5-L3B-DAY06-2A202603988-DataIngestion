@@ -5,7 +5,12 @@ Pipeline biến **EU AI Act + GDPR** (572 trang nội dung) thành kho tri thứ
 
 - Báo cáo cá nhân: [`report/individual/2A202603988_CaoDuyMinh.md`](report/individual/2A202603988_CaoDuyMinh.md)
 - Bảng kết quả: [`starter/results/summary.md`](starter/results/summary.md) · nhật ký thí nghiệm: [`artifacts/experiment_log.csv`](artifacts/experiment_log.csv)
-- Demo HTML: [`demo/index.html`](demo/index.html) (kết quả, so sánh từng câu hỏi, tìm thử trực tiếp)
+- Demo HTML: [`demo/index.html`](demo/index.html), chạy qua `python -m src.demo_server`:
+  - **Kết quả:** bảng Hit@1/Hit@3 theo chiến lược × model, chấm tay, chi phí LLM.
+  - **So sánh câu hỏi:** deck toàn màn hình (kéo/phóng to), 3 model × 7 kỹ thuật, cột xếp hạng 1-2-3 theo vị trí chunk bằng chứng, bản đồ chunk trên trang bằng chứng (thấy chunk bị cắt ngang câu).
+  - **Dấu ?:** giải thích theo câu, model và hạng hiện tại; so sánh kỹ thuật (cùng model) hoặc model (cùng kỹ thuật) cạnh nhau; xem đúng các chunk đã tạo, không gian embedding (bán kính = 1 − cos thật), code chunking/embedding/truy vấn.
+  - **Tìm thử:** truy vấn trực tiếp vào pgvector.
+- Kịch bản thuyết trình 2 phút: [`report/presentation_2min.md`](report/presentation_2min.md)
 - Đề bài gốc: [`docs/LAB_README.md`](docs/LAB_README.md)
 
 ## Chiến lược
