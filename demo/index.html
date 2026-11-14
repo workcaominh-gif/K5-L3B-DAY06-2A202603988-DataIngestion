@@ -237,19 +237,19 @@ function why(qid,m,k,E,R){
  // vs other models, same technique
  out.push(`<p><b>Cùng kỹ thuật ${k} trên model khác:</b> ${MK.map(mm=>{const x=R[mm].find(y=>y.k===k);return `${esc(mname(mm))}: hạng ${x.place}, ${x.ev?'bằng chứng #'+x.ev[P.rank]+' (cos '+f3(x.ev[P.cos])+')':'không có chunk chứa trọn'}`}).join(' · ')}.</p>`);
  return out.join('')}
-async function openQ(k,ms){
- const qid=$('#cq')?.value||Q[0].id;ms=[].concat(ms||'bge');CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
- const e=EXPLAIN[k],s=D.strategies.find(x=>x.key===k);
- $('#mbox').classList.toggle('wide',ms.length>1);
- $('#mbox').innerHTML=`<button class="close" onclick="document.getElementById('modal').classList.remove('show')">Đóng</button><h3>${tag(k)} ${esc(s.name)}</h3>
+async function openQ(ks,m){
+ const qid=$('#cq')?.value||Q[0].id;ks=[].concat(ks);m=m||'bge';CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
+ const order=R[m].map(r=>r.k);ks.sort((a,b)=>order.indexOf(a)-order.indexOf(b));
+ const bench=k=>{const x=(D.retrieval[m]||{})[k]||{},d=x.dev,t=x.test;return d?`Toàn benchmark trên ${esc(mname(m))}: dev Hit@1 ${d.hit1}/${d.n}, dev Hit@3 ${d.hit3}/${d.n}${t?`, test Hit@3 ${t.hit3}/${t.n}`:''}.`:''};
+ $('#mbox').classList.toggle('wide',ks.length>1);
+ $('#mbox').innerHTML=`<button class="close" onclick="document.getElementById('modal').classList.remove('show')">Đóng</button><h3>So sánh kỹ thuật chunking trên ${esc(mname(m))}</h3>
  <div class="small" style="margin:6px 0">Câu ${qid}: ${esc(CQ.question)}</div>
- <div class="row msel" style="margin:0 0 8px"><span class="small">Chọn model để so sánh:</span>${MK.map(mm=>`<label class="mck"><input type="checkbox" value="${mm}" ${ms.includes(mm)?'checked':''}> ${esc(mname(mm))}</label>`).join('')}
+ <div class="row msel" style="margin:0 0 8px"><span class="small">Chọn kỹ thuật để so sánh (xếp theo hạng trên câu này):</span>${R[m].map(r=>`<label class="mck"><input type="checkbox" value="${r.k}" ${ks.includes(r.k)?'checked':''}> ${r.place}. ${tag(r.k)} ${esc(sname(r.k))}</label>`).join('')}
  <button class="btn" id="mok">OK</button></div>
- <h4>Là gì · chạy thế nào</h4><p>${e.what} ${e.how}</p>
- <div class="mgrid" style="grid-template-columns:repeat(${ms.length},minmax(0,1fr))">${ms.map(m=>`<div class="mcell"><div class="mh">${esc(mname(m))}</div>
-  <h4>Kết quả trên câu này</h4>${why(qid,m,k,E,R)}<h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}</div>`).join('')}</div>
- <h4>Toàn bộ benchmark</h4><table><tr><th>Model</th><th>Dev Hit@1</th><th>Dev Evidence Hit@3</th><th>Test Evidence Hit@3</th></tr>${nums(k)}</table>`;
- $('#mok').onclick=()=>{const sel=[...document.querySelectorAll('.msel input:checked')].map(i=>i.value);if(sel.length)openQ(k,sel)};
+ <div class="mgrid" style="grid-template-columns:repeat(${ks.length},minmax(0,1fr))">${ks.map(k=>`<div class="mcell"><div class="mh">${tag(k)} ${esc(sname(k))}</div>
+  <p class="small">${EXPLAIN[k].what} ${EXPLAIN[k].how}</p>
+  <h4>Kết quả trên câu này</h4>${why(qid,m,k,E,R)}<p class="small">${bench(k)}</p><h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}</div>`).join('')}</div>`;
+ $('#mok').onclick=()=>{const sel=[...document.querySelectorAll('.msel input:checked')].map(i=>i.value);if(sel.length)openQ(sel,m)};
  $('#modal').classList.add('show')}
 function renderLive(){
  $('#live').innerHTML=`<div class="panel"><div class="row"><input type="text" id="lq" placeholder="Hỏi về AI Act hoặc GDPR, ví dụ: How long do I have to report a data breach?">
