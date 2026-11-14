@@ -71,7 +71,8 @@ mark{background:#ffe08a;border-radius:3px}
 .why p{font-size:13.5px;margin:6px 0}.mini{font-size:12.5px}.mini tr.me td{background:#f3f6fb;font-weight:600}
 .tp{border-radius:9px;padding:7px 9px;margin-top:6px;background:#f6f7f9;font-size:12.5px}.tp.ok{box-shadow:inset 3px 0 0 var(--g);background:var(--gb)}.tp.part{box-shadow:inset 3px 0 0 #d9a400;background:#fff6e0}
 .zb button,.mbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font:inherit;font-size:14px;cursor:pointer}.mbtn.on{background:var(--b);color:#fff;border-color:var(--b)}
-.box{max-width:820px}.box.wide{max-width:96vw}.diff{background:#f5f8fc;border-radius:12px;padding:8px 14px;margin:8px 0 14px}.diff li{margin:5px 0;font-size:13.5px}details.code{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:6px 0;background:#fafbfc}details.code summary{cursor:pointer;font-weight:600;font-size:14px}details.code pre{background:#1e2329;color:#e6e9ee;border-radius:8px;padding:10px;overflow:auto;max-height:420px;font-size:12px;line-height:1.45;margin:4px 0 8px}.ct2{font:12px ui-monospace,Menlo,monospace;color:var(--mut);margin-top:6px}.mgrid{display:grid;gap:16px}.mcell{min-width:0}.mcell+.mcell{border-left:1px solid var(--line);padding-left:16px}.mck{display:inline-flex;align-items:center;gap:4px;font-size:14px;cursor:pointer}
+.box{max-width:820px}.box.wide{max-width:96vw}.cblk{border-left:5px solid var(--c);background:#fff;border-radius:8px;padding:6px 10px;margin:4px 0;font-size:13px}.cblk.ok{box-shadow:0 0 0 2px #1f8a5b}.cblk.part{box-shadow:0 0 0 2px #d9a400}.cblk .txt{max-height:240px}.cut{font-size:11px;color:var(--mut);text-align:center;letter-spacing:.05em}mark.pm{background:#fff0bf}
+.diff{background:#f5f8fc;border-radius:12px;padding:8px 14px;margin:8px 0 14px}.diff li{margin:5px 0;font-size:13.5px}details.code{border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:6px 0;background:#fafbfc}details.code summary{cursor:pointer;font-weight:600;font-size:14px}details.code pre{background:#1e2329;color:#e6e9ee;border-radius:8px;padding:10px;overflow:auto;max-height:420px;font-size:12px;line-height:1.45;margin:4px 0 8px}.ct2{font:12px ui-monospace,Menlo,monospace;color:var(--mut);margin-top:6px}.mgrid{display:grid;gap:16px}.mcell{min-width:0}.mcell+.mcell{border-left:1px solid var(--line);padding-left:16px}.mck{display:inline-flex;align-items:center;gap:4px;font-size:14px;cursor:pointer}
 @media (max-width:900px){.mgrid{grid-template-columns:1fr!important}.mcell+.mcell{border-left:0;padding-left:0;border-top:1px solid var(--line)}}
 @media (max-width:700px){main,header{padding-left:16px;padding-right:16px}}
 </style></head>
@@ -313,21 +314,53 @@ function diffWhy(qid,m,ks,E,R){
   else if(!e&&!be)why.push('cả hai đều không có chunk chứa trọn câu bằng chứng; thứ tự chỉ còn so mảnh chứa một phần');
   out.push(`<li><b>Vì sao ${tag(b.k)} hơn ${tag(r.k)}:</b> ${why.join('; ')}.</li>`)}
  return `<div class="diff"><h4>Vì sao kết quả khác nhau giữa các kỹ thuật đã chọn (${esc(mname(m))}, câu ${qid})</h4>${tbl}<ul>${out.join('')}</ul><div class="small">Cùng model, cùng câu hỏi: khác biệt chỉ đến từ cách cắt chunk, vì nó quyết định chunk chứa bằng chứng gồm những chữ nào, từ đó ra vector nào và cos bao nhiêu. Các lý do trên (header, độ dài, mở đầu giữa câu) là đặc điểm quan sát được, không phải phép đo nhân quả: vector là của cả đoạn văn, nên không tách được chính xác mỗi yếu tố góp bao nhiêu.</div></div>`}
-async function openQ(ks,m){
- const qid=$('#cq')?.value||Q[0].id;ks=[].concat(ks);m=m||'bge';CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
+function evRe(){const w=CQ.evidence_quote.trim().split(/\s+/).map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));return [new RegExp(w.join('[\\s\\u00ad-]+'),'i'),new RegExp(w.slice(0,5).join('[\\s\\u00ad-]+'),'i'),new RegExp(w.slice(-5).join('[\\s\\u00ad-]+'),'i')]}
+function chunkView(k,m,E){
+ const pm=E._pagemap,ch=(pm.chunks[k]||[]),cs=(pm.cos[m]||{})[k]||[];const res=evRe();
+ const items=ch.map((c,i)=>({c,cs:cs[i],i})).filter(x=>x.c[4]);if(!items.length)return '<div class="small">Không có dữ liệu chunk cho trang này.</div>';
+ let h='',prevEnd=null;
+ items.forEach((x,j)=>{const [a,b,id,ok,text,llm]=x.c,[cos,rk,st]=x.cs;const ov=prevEnd!=null&&prevEnd>a?prevEnd-a:0;prevEnd=b;
+  let t=esc(text),m0=t.match(res[0]);
+  if(m0)t=t.replace(res[0],v=>`<mark>${v}</mark>`);else{t=t.replace(res[1],v=>`<mark class="pm">${v}</mark>`).replace(res[2],v=>`<mark class="pm">${v}</mark>`)}
+  const src=k==='L'?(llm?'<span class="chip ok">Haiku cắt</span>':'<span class="chip">trang ngoài mẫu → cắt như D</span>'):'';
+  h+=`<div class="cblk ${st===2?'ok':st===1?'part':''}" style="--c:${COL[k]}"><div class="meta"><b>Chunk ${j+1}</b><span>${esc(id)}</span><span>${text.length} ký tự</span>${ok?`<span>hạng #${rk} · cos ${f3(cos)}</span>`:'<span>bị lọc ở C</span>'}${ov?`<span class="chip">lặp ${ov} ký tự của chunk trước</span>`:''}${src}${st===2?'<span class="chip ok">chứa trọn bằng chứng</span>':st===1?'<span class="chip" style="background:#d9a400;color:#fff">ranh giới cắt qua bằng chứng</span>':''}</div><div class="txt">${t}</div></div>`;
+  if(j<items.length-1)h+='<div class="cut">✂ ranh giới chunk</div>'});
+ return `<details class="code" open><summary>Kết quả chunking trên trang bằng chứng (${CQ.gold_source_id.startsWith('gdpr')?'GDPR':'AI Act'} tr.${CQ.gold_page}) · ${items.length} chunk</summary><div class="small">Đúng văn bản các chunk mà ${k} tạo ra trên trang này, theo thứ tự; vàng = câu bằng chứng (vàng nhạt = chỉ một phần câu nằm trong chunk). Cách cắt không phụ thuộc model; hạng và cos là của ${esc(mname(m))}.</div>${h}</details>`}
+function diffModels(qid,k,ms,E,R){
+ const rows=ms.map(m=>({m,...R[m].find(r=>r.k===k)}));
+ const tbl=`<table class="mini"><tr><th>Model</th><th>Hạng của ${k}</th><th>@1</th><th>@3</th><th>Chunk bằng chứng ở</th><th>Đoạn</th><th>cos</th><th>Chunk #1</th></tr>${rows.map(r=>{const e=r.ev,t1=r.top[0];return `<tr><td>${esc(mname(r.m))}</td><td>${r.place}/7</td><td>${r.h1?'✓':'✗'}</td><td>${r.h3?'✓':'✗'}</td><td>${e?'#'+e[P.rank]+'/'+r.n:'không có'}</td><td class="small">${e?esc(locp(e)):'—'}</td><td>${e?f3(e[P.cos]):'—'}</td><td class="small">${t1[P.st]===2?'chính là chunk bằng chứng':esc(locp(t1))+' · cos '+f3(t1[P.cos])}</td></tr>`}).join('')}</table>`;
+ const li=[];const best=[...rows].sort((a,b)=>(a.ev?a.ev[P.rank]:1e9)-(b.ev?b.ev[P.rank]:1e9))[0];
+ if(!best.ev)li.push(`<li>${k} không tạo chunk nào chứa trọn câu bằng chứng, nên model nào cũng trượt: lỗi nằm ở bước chunking, đổi model không cứu được.</li>`);
+ else for(const r of rows){if(r===best)continue;const e=r.ev;
+  if(!e){li.push(`<li>${esc(mname(r.m))}: không có chunk chứa trọn bằng chứng trong phạm vi tìm.</li>`);continue}
+  const sameChunk=locp(e)===locp(best.ev);
+  if(e[P.rank]===best.ev[P.rank]){li.push(`<li><b>${esc(mname(best.m))} vs ${esc(mname(r.m))}:</b> ${sameChunk?'cùng một chunk bằng chứng':'chunk bằng chứng khác nhau'}, cả hai model đều xếp nó #${e[P.rank]}, nên với ${k} kết quả như nhau${r.place!==best.place?`. Hạng của ${k} trong 7 kỹ thuật khác nhau (${best.place} vs ${r.place}) chỉ vì các kỹ thuật khác đổi chỗ trên model này`:''}.</li>`);continue}
+  li.push(`<li><b>${esc(mname(best.m))} vs ${esc(mname(r.m))}:</b> ${sameChunk?'cùng một chunk bằng chứng (chunk giống hệt vì cách cắt không phụ thuộc model)':'chunk bằng chứng được chọn khác nhau'}, nhưng ${esc(mname(best.m))} xếp nó #${best.ev[P.rank]} còn ${esc(mname(r.m))} xếp #${e[P.rank]}${e[P.rank]>1?`: với ${esc(mname(r.m))}, ${esc(locp(r.top[0]))} (cos ${f3(r.top[0][P.cos])}) gần câu hỏi hơn chunk bằng chứng (cos ${f3(e[P.cos])})`:''}. Khác biệt đến từ cách mỗi model biến chữ thành vector${/gemma/i.test(r.m+best.m)?' (Gemma 768 chiều, dùng prompt query/document)':''}.</li>`)}
+ return `<div class="diff"><h4>Vì sao cùng kỹ thuật ${k} nhưng khác model lại khác kết quả (câu ${qid})</h4>${tbl}<ul>${li.join('')}</ul><div class="small">Chunk giống hệt nhau giữa các model; chỉ vector khác. Giá trị cos của các model không so trực tiếp được với nhau (mỗi model có thang riêng), nên hãy so hạng.</div></div>`}
+async function openQ(ks,m,mode,ms){
+ const qid=$('#cq')?.value||Q[0].id;ks=[].concat(ks);m=m||'bge';mode=mode||'k';ms=[].concat(ms||m);CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
  const order=R[m].map(r=>r.k);ks.sort((a,b)=>order.indexOf(a)-order.indexOf(b));
- const bench=k=>{const x=(D.retrieval[m]||{})[k]||{},d=x.dev,t=x.test;return d?`Toàn benchmark trên ${esc(mname(m))}: dev Hit@1 ${d.hit1}/${d.n}, dev Hit@3 ${d.hit3}/${d.n}${t?`, test Hit@3 ${t.hit3}/${t.n}`:''}.`:''};
- $('#mbox').classList.toggle('wide',ks.length>1);
- $('#mbox').innerHTML=`<button class="close" onclick="document.getElementById('modal').classList.remove('show')">Đóng</button><h3>So sánh kỹ thuật chunking trên ${esc(mname(m))}</h3>
+ const cells=mode==='k'?ks.map(k=>({k,m})):ms.map(mm=>({k:ks[0],m:mm}));
+ const bench=(k,m)=>{const x=(D.retrieval[m]||{})[k]||{},d=x.dev,t=x.test;return d?`Toàn benchmark trên ${esc(mname(m))}: dev Hit@1 ${d.hit1}/${d.n}, dev Hit@3 ${d.hit3}/${d.n}${t?`, test Hit@3 ${t.hit3}/${t.n}`:''}.`:''};
+ $('#mbox').classList.toggle('wide',cells.length>1);
+ const picker=mode==='k'
+  ?`<span class="small">Chọn kỹ thuật (cùng ${esc(mname(m))}, xếp theo hạng):</span>${R[m].map(r=>`<label class="mck"><input type="checkbox" value="${r.k}" ${ks.includes(r.k)?'checked':''}> ${r.place}. ${tag(r.k)} ${esc(sname(r.k))}</label>`).join('')}`
+  :`<span class="small">Chọn model (cùng kỹ thuật ${tag(ks[0])}):</span>${MK.map(mm=>`<label class="mck"><input type="checkbox" value="${mm}" ${ms.includes(mm)?'checked':''}> ${esc(mname(mm))}</label>`).join('')}`;
+ $('#mbox').innerHTML=`<button class="close" onclick="document.getElementById('modal').classList.remove('show')">Đóng</button>
+ <div class="row" style="margin:0 0 6px"><button class="mbtn ${mode==='k'?'on':''}" id="modek">So sánh kỹ thuật chunking (cùng model)</button><button class="mbtn ${mode==='m'?'on':''}" id="modem">So sánh model embedding (cùng kỹ thuật)</button></div>
+ <h3>${mode==='k'?`So sánh kỹ thuật chunking trên ${esc(mname(m))}`:`${tag(ks[0])} ${esc(sname(ks[0]))} trên các model embedding`}</h3>
  <div class="small" style="margin:6px 0">Câu ${qid}: ${esc(CQ.question)}</div>
- <div class="row msel" style="margin:0 0 8px"><span class="small">Chọn kỹ thuật để so sánh (xếp theo hạng trên câu này):</span>${R[m].map(r=>`<label class="mck"><input type="checkbox" value="${r.k}" ${ks.includes(r.k)?'checked':''}> ${r.place}. ${tag(r.k)} ${esc(sname(r.k))}</label>`).join('')}
- <button class="btn" id="mok">OK</button></div>
- ${ks.length>1?diffWhy(qid,m,ks,E,R):''}
- <div class="mgrid" style="grid-template-columns:repeat(${ks.length},minmax(0,1fr))">${ks.map(k=>`<div class="mcell"><div class="mh">${tag(k)} ${esc(sname(k))}</div>
-  <p class="small">${EXPLAIN[k].what} ${EXPLAIN[k].how}</p>
-  <h4>Kết quả trên câu này</h4>${why(qid,m,k,E,R)}<p class="small">${bench(k)}</p><h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}<h4>Code</h4><div id="code_${k}" class="small">Đang tải code…</div></div>`).join('')}</div>`;
- ks.forEach(async k=>{const el=document.getElementById('code_'+k);try{el.outerHTML=await codeBlocks(k,m)}catch(e){el.textContent='Không tải được code: '+e.message}});
- $('#mok').onclick=()=>{const sel=[...document.querySelectorAll('.msel input:checked')].map(i=>i.value);if(sel.length)openQ(sel,m)};
+ <div class="row msel" style="margin:0 0 8px">${picker}<button class="btn" id="mok">OK</button></div>
+ ${cells.length>1?(mode==='k'?diffWhy(qid,m,ks,E,R):diffModels(qid,ks[0],ms,E,R)):''}
+ ${mode==='m'?chunkView(ks[0],ms[0],E):''}
+ <div class="mgrid" style="grid-template-columns:repeat(${cells.length},minmax(0,1fr))">${cells.map((c,i)=>`<div class="mcell"><div class="mh">${mode==='k'?tag(c.k)+' '+esc(sname(c.k)):esc(mname(c.m))}</div>
+  ${mode==='k'?`<p class="small">${EXPLAIN[c.k].what} ${EXPLAIN[c.k].how}</p>`:''}
+  <h4>Kết quả trên câu này</h4>${why(qid,c.m,c.k,E,R)}<p class="small">${bench(c.k,c.m)}</p>
+  ${mode==='k'?chunkView(c.k,c.m,E):''}
+  <h4>Không gian embedding của câu này</h4>${plot(info(E[c.m][c.k]),c.k,640)}<h4>Code</h4><div id="code_${i}" class="small">Đang tải code…</div></div>`).join('')}</div>`;
+ cells.forEach(async(c,i)=>{const el=document.getElementById('code_'+i);try{el.outerHTML=await codeBlocks(c.k,c.m)}catch(e){el.textContent='Không tải được code: '+e.message}});
+ $('#modek').onclick=()=>openQ(ks[0],ms[0],'k');$('#modem').onclick=()=>openQ(ks[0],m,'m',MK);
+ $('#mok').onclick=()=>{const sel=[...document.querySelectorAll('.msel input:checked')].map(i=>i.value);if(!sel.length)return;mode==='k'?openQ(sel,m,'k'):openQ(ks[0],sel[0],'m',sel)};
  $('#modal').classList.add('show')}
 function renderLive(){
  $('#live').innerHTML=`<div class="panel"><div class="row"><input type="text" id="lq" placeholder="Hỏi về AI Act hoặc GDPR, ví dụ: How long do I have to report a data breach?">

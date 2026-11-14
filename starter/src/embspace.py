@@ -138,13 +138,16 @@ def main() -> None:
                                 continue
                             loc = _locate(w["_T"], r["text"])
                             if loc:
-                                spans.append((loc[0], loc[1], r["chunk_id"], bool(ok[i])))
-                        spans.sort()
-                        pm["chunks"][label] = [[a, b, c, int(o)] for a, b, c, o in spans]
+                                gp = next(x for x in w["pages"] if x["page"] == q["gold_page"])
+                                on_gold = loc[0] < gp["end"] and loc[1] > gp["start"]
+                                llm = int(label == "L" and f"{r['document_id']}:{r['page']}" in llm_pages)
+                                spans.append((loc[0], loc[1], r["chunk_id"], bool(ok[i]), r["text"] if on_gold else None, llm))
+                        spans.sort(key=lambda x: (x[0], x[1]))
+                        pm["chunks"][label] = [[a, b, c, int(o), t, l] for a, b, c, o, t, l in spans]
                     idx = {r["chunk_id"]: i for i, r in enumerate(rows)}
                     pm["cos"].setdefault(m["key"], {})[label] = [
                         [round(float(sims[idx[c]]), 4), int(rank[idx[c]]) if o else 0, 2 if idx[c] in hits else 1 if idx[c] in parts else 0]
-                        for _, _, c, o in pm["chunks"][label]]
+                        for _, _, c, o, _t, _l in pm["chunks"][label]]
                 print(m["key"], label, len(rows), "chunks")
     for f in OUT.glob("*.json"):
         f.unlink()
