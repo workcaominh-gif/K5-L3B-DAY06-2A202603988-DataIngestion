@@ -289,18 +289,22 @@ function diffWhy(qid,m,ks,E,R){
  const rows=ks.map(k=>({k,...R[m].find(r=>r.k===k)}));const best=rows[0];
  const evLen=CQ.evidence_quote.length;
  const startsMid=p=>{const t=p[P.txt].replace(/^\[[^\]]*\]\s*/,'');return /^[a-z,;.)]/.test(t)};
- const tbl=`<table class="mini"><tr><th>Kỹ thuật</th><th>Hạng</th><th>@1</th><th>@3</th><th>Chunk bằng chứng ở</th><th>cos</th><th>Độ dài</th><th>Câu bằng chứng chiếm</th><th>Header</th><th>Mở đầu chunk</th><th>Chunk #1</th></tr>${rows.map(r=>{const e=r.ev,t1=r.top[0];
-  return `<tr><td>${tag(r.k)}</td><td>${r.place}</td><td>${r.h1?'✓':'✗'}</td><td>${r.h3?'✓':'✗'}</td><td>${e?'#'+e[P.rank]+'/'+r.n:'không có'}</td><td>${e?f3(e[P.cos]):'—'}</td><td>${e?e[P.len]:'—'}</td><td>${e?Math.round(100*evLen/e[P.len])+'%':'—'}</td><td>${e?(e[P.hdr]?'có':'không'):'—'}</td><td class="small">${e?esc(e[P.txt].slice(0,60))+'…'+(startsMid(e)?' <b>(giữa câu)</b>':''):'—'}</td><td class="small">${t1[P.st]===2?'chính là chunk bằng chứng':esc(locp(t1))+' · cos '+f3(t1[P.cos])}</td></tr>`}).join('')}</table>`;
+ const tbl=`<table class="mini"><tr><th>Kỹ thuật</th><th>Hạng</th><th>@1</th><th>@3</th><th>Chunk bằng chứng ở</th><th>Đoạn</th><th>cos</th><th>Độ dài</th><th>Câu bằng chứng chiếm</th><th>Header</th><th>Mở đầu chunk</th><th>Chunk #1</th></tr>${rows.map(r=>{const e=r.ev,t1=r.top[0];
+  return `<tr><td>${tag(r.k)}</td><td>${r.place}</td><td>${r.h1?'✓':'✗'}</td><td>${r.h3?'✓':'✗'}</td><td>${e?'#'+e[P.rank]+'/'+r.n:'không có'}</td><td class="small">${e?esc(locp(e)):'—'}</td><td>${e?f3(e[P.cos]):'—'}</td><td>${e?e[P.len]:'—'}</td><td>${e?Math.round(100*evLen/e[P.len])+'%':'—'}</td><td>${e?(e[P.hdr]?'có':'không'):'—'}</td><td class="small">${e?esc(e[P.txt].slice(0,60))+'…'+(startsMid(e)?' <b>(giữa câu)</b>':''):'—'}</td><td class="small">${t1[P.st]===2?'chính là chunk bằng chứng':esc(locp(t1))+' · cos '+f3(t1[P.cos])}</td></tr>`}).join('')}</table>`;
  const out=[];
  for(const r of rows.slice(1)){const b=best,e=r.ev,be=b.ev,why=[];
   if(r.place===b.place){out.push(`<li>${tag(r.k)} và ${tag(b.k)} chung hạng: hai cách cắt cho ra cùng một chunk bằng chứng (cùng cos ${be?f3(be[P.cos]):'—'}).</li>`);continue}
   if(!e&&be){why.push(`${r.k} ${MECH[r.k]}, nên ranh giới rơi giữa câu bằng chứng và không chunk nào chứa trọn câu — trúng trang cũng bị tính trượt; ${b.k} ${MECH[b.k]}, nên câu nằm trọn trong một chunk`+(r.part?` (mảnh tốt nhất của ${r.k} đứng #${r.part[P.rank]})`:''))}
   else if(e&&be){const d=be[P.cos]-e[P.cos];
    if(Math.abs(d)<0.0005){why.push(`hai kỹ thuật có cùng chunk bằng chứng (cos ${f3(be[P.cos])}), nên chênh lệch không nằm ở chunk mà ở các chunk cạnh tranh: ${b.k} xếp nó #${be[P.rank]}/${b.n}, ${r.k} #${e[P.rank]}/${r.n}`+(b.k==='C'&&CQ.filter?`, vì C lọc part = ${CQ.filter.part} trước khi xếp hạng nên ${r.n-b.n} chunk sai phạm vi (trong đó có những chunk đứng trên ở ${r.k}) bị loại`:'')+(r.top[0][P.st]!==2?`; ở ${r.k}, chunk #1 là ${esc(locp(r.top[0]))} (cos ${f3(r.top[0][P.cos])})`:''));out.push(`<li><b>Vì sao ${tag(b.k)} hơn ${tag(r.k)}:</b> ${why.join('; ')}.</li>`);continue}
-   why.push(`chunk bằng chứng của ${b.k} gần câu hỏi hơn ${f3(d)} (cos ${f3(be[P.cos])} so với ${f3(e[P.cos])}), nên ${b.k} xếp nó #${be[P.rank]} còn ${r.k} chỉ #${e[P.rank]}`);
+   const both1=be[P.rank]===1&&e[P.rank]===1;
+   why.push(both1?`cả hai đều đặt chunk bằng chứng ở #1 (đều Hit@1), nên về kết quả là như nhau; ${b.k} đứng trên chỉ vì cos cao hơn ${f3(d)} (${f3(be[P.cos])} so với ${f3(e[P.cos])}), một chênh lệch nhỏ`
+     :`chunk bằng chứng của ${b.k} gần câu hỏi hơn ${f3(d)} (cos ${f3(be[P.cos])} so với ${f3(e[P.cos])}), nên ${b.k} xếp nó #${be[P.rank]} còn ${r.k} chỉ #${e[P.rank]}`);
+   if(locp(be)!==locp(e))why.push(`lưu ý hai chunk không chứa cùng một đoạn: chunk của ${b.k} là ${esc(locp(be))}, của ${r.k} là ${esc(locp(e))} (câu hỏi có hơn một đoạn được chấp nhận làm bằng chứng)`);
    if(be[P.hdr]&&!e[P.hdr])why.push(`${b.k} có header "[${be[P.doc]} | … | ${esc(be[P.where])} …]" mang tên Điều/phần trùng từ khoá câu hỏi; chunk của ${r.k} không có`);
    const sb=evLen/be[P.len],sr=evLen/e[P.len];
-   if(sr<sb*0.75)why.push(`chunk của ${r.k} dài ${e[P.len]} ký tự, câu bằng chứng chỉ chiếm ${Math.round(100*sr)}% (của ${b.k}: ${Math.round(100*sb)}%) nên phần nội dung khác kéo vector ra xa câu hỏi`);
+   if(sr<sb*0.75&&d>0)why.push(`chunk của ${r.k} dài ${e[P.len]} ký tự, câu bằng chứng chỉ chiếm ${Math.round(100*sr)}% (của ${b.k}: ${Math.round(100*sb)}%) nên phần nội dung khác kéo vector ra xa câu hỏi`);
+   if(sr>sb*1.33&&d>0)why.push(`chunk của ${r.k} ngắn hơn và câu bằng chứng chiếm tỉ lệ lớn hơn (${Math.round(100*sr)}% so với ${Math.round(100*sb)}%) mà vẫn thua, nên độ dài không phải lý do chính ở đây`);
    if(startsMid(e)&&!startsMid(be))why.push(`chunk của ${r.k} bắt đầu giữa câu (do ${MECH[r.k]}), còn ${b.k} bắt đầu ở đầu một ý`);
    const t1=r.top[0];if(t1[P.st]!==2)why.push(`ở ${r.k}, chunk #1 là ${esc(locp(t1))} (cos ${f3(t1[P.cos])})${t1[P.where]==='Recital'?': recital cùng chủ đề':''}${t1[P.st]===1?': mảnh chứa một phần bằng chứng':''}, chen lên trước chunk bằng chứng`);
    if(r.k==='L')why.push(e[P.llm]?'trang bằng chứng nằm trong mẫu do Haiku cắt':'trang bằng chứng ngoài mẫu LLM nên L cắt giống D');
@@ -308,7 +312,7 @@ function diffWhy(qid,m,ks,E,R){
   }
   else if(!e&&!be)why.push('cả hai đều không có chunk chứa trọn câu bằng chứng; thứ tự chỉ còn so mảnh chứa một phần');
   out.push(`<li><b>Vì sao ${tag(b.k)} hơn ${tag(r.k)}:</b> ${why.join('; ')}.</li>`)}
- return `<div class="diff"><h4>Vì sao kết quả khác nhau giữa các kỹ thuật đã chọn (${esc(mname(m))}, câu ${qid})</h4>${tbl}<ul>${out.join('')}</ul><div class="small">Cùng model, cùng câu hỏi: khác biệt chỉ đến từ cách cắt chunk, vì nó quyết định chunk chứa bằng chứng gồm những chữ nào, từ đó ra vector nào và cos bao nhiêu.</div></div>`}
+ return `<div class="diff"><h4>Vì sao kết quả khác nhau giữa các kỹ thuật đã chọn (${esc(mname(m))}, câu ${qid})</h4>${tbl}<ul>${out.join('')}</ul><div class="small">Cùng model, cùng câu hỏi: khác biệt chỉ đến từ cách cắt chunk, vì nó quyết định chunk chứa bằng chứng gồm những chữ nào, từ đó ra vector nào và cos bao nhiêu. Các lý do trên (header, độ dài, mở đầu giữa câu) là đặc điểm quan sát được, không phải phép đo nhân quả: vector là của cả đoạn văn, nên không tách được chính xác mỗi yếu tố góp bao nhiêu.</div></div>`}
 async function openQ(ks,m){
  const qid=$('#cq')?.value||Q[0].id;ks=[].concat(ks);m=m||'bge';CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
  const order=R[m].map(r=>r.k);ks.sort((a,b)=>order.indexOf(a)-order.indexOf(b));
