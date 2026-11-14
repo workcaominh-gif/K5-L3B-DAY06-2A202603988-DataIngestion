@@ -8,3 +8,6 @@ __pycache__/
 .DS_Store
 .pytest_cache/
 *.sqlite
+
+# Day 6: raw source PDFs are downloaded per data/manifest.json (not committed)
+starter/data/raw/*.pdf

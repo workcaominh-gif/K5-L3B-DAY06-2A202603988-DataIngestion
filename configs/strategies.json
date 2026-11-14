@@ -1,0 +1,8 @@
+{
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "top_k": 3,
+  "A": {"chunking": "fixed_size", "chunk_size": 500, "overlap": 50, "scope": "per page", "filter": false},
+  "D": {"chunking": "recursive (paragraph > line > sentence > word)", "chunk_size": 800, "overlap": 80, "scope": "per page", "filter": false},
+  "B": {"chunking": "structure_aware (recital / Article / numbered paragraph / annex point) + context header", "chunk_size": 1200, "overlap": 0, "scope": "whole document, records page..page_end", "filter": false},
+  "C": {"chunking": "same index as B", "filter": true, "filter_fields": ["part"], "note": "filter applied only to questions whose context supplies it; other questions run unfiltered"}
+}
