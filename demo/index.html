@@ -49,6 +49,24 @@ mark{background:#ffe08a;border-radius:3px}
 .verd{font-size:12.5px;font-weight:600;white-space:nowrap}.verd.ok{color:var(--g)}.verd.no{color:var(--r)}
 .det{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:4px}
 .det .txt{max-height:none;font-size:13.5px}.lg{display:inline-flex;align-items:center;gap:5px;margin-right:12px}.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--line)}
+.vp{position:relative;height:78vh;min-height:480px;overflow:hidden;background:#eef1f5;border-radius:14px;cursor:grab;touch-action:none}.vp.grab{cursor:grabbing}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;width:2220px}
+.card{position:absolute;top:0;width:660px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:16px}
+.rows{position:relative}.crow{display:flex;align-items:center;gap:7px;height:44px;padding:0 8px;margin-bottom:6px;border-radius:9px;background:#f6f7f9;border-left:6px solid var(--c);cursor:pointer;font-size:13px}
+.crow.sel{background:#fff;box-shadow:0 0 0 2px var(--c)}
+.crow .pl{font-weight:700;font-size:17px;width:20px;text-align:center}.crow .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stag{display:inline-block;min-width:20px;text-align:center;border-radius:5px;color:#fff;font-weight:700;font-size:12px;padding:1px 5px}
+.hk{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 7px}.hk.ok{background:var(--gb);color:var(--g)}.hk.no{background:var(--rb);color:var(--r)}
+.evr{font-size:11.5px;color:var(--mut);width:190px;text-align:right}
+.links{position:absolute;left:0;top:0;pointer-events:none}
+.cdet{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.dh{margin-bottom:6px}
+.esp{width:100%;height:auto;background:#fbfcfd;border-radius:10px}.esp .rl{font-size:10px;fill:#9aa1a9}.esp .pn{font-size:11px;font-weight:700;fill:#fff;text-anchor:middle}
+.esp .pl1{font-size:11px;font-weight:600;fill:#1d2321}.esp .pl2{font-size:10px;fill:#59606a}.esp .pt{cursor:help}
+.why p{font-size:13.5px;margin:6px 0}.mini{font-size:12.5px}.mini tr.me td{background:#f3f6fb;font-weight:600}
+.tp{border-radius:9px;padding:7px 9px;margin-top:6px;background:#f6f7f9;font-size:12.5px}.tp.ok{box-shadow:inset 3px 0 0 var(--g);background:var(--gb)}.tp.part{box-shadow:inset 3px 0 0 #d9a400;background:#fff6e0}
+.zb button,.mbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font:inherit;font-size:14px;cursor:pointer}.mbtn.on{background:var(--b);color:#fff;border-color:var(--b)}
+.box{max-width:820px}
 @media (max-width:700px){main,header{padding-left:16px;padding-right:16px}}
 </style></head>
 <body>
@@ -67,7 +85,7 @@ mark{background:#ffe08a;border-radius:3px}
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let D=null,Q=[],TR={};
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['res','cmp','live'].forEach(id=>$('#'+id).hidden=id!==b.dataset.t)});
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['res','cmp','live'].forEach(id=>$('#'+id).hidden=id!==b.dataset.t);if(b.dataset.t==='cmp'&&CQ)showCmp(CQ.id)});
 const EXPLAIN={
  F:{what:'Cắt cố định (fixed-size), không chồng lấn.',how:'Mỗi trang PDF được cắt thành các đoạn liền nhau đúng 500 ký tự, không quan tâm câu, khoản hay Điều. Đoạn sau bắt đầu ngay chỗ đoạn trước kết thúc.',why:'Ranh giới rơi bất kỳ đâu, nên câu và cả chữ bị cắt đôi (coherence chấm tay 0,1/2). Câu trích bằng chứng nằm vắt qua ranh giới sẽ không có chunk nào chứa trọn, nên bị tính trượt (lỗi evidence_split). Metadata Điều lấy theo đầu trang nên sai với đoạn ở nửa dưới trang. Đây là baseline thấp nhất ở cả 3 model.'},
  A:{what:'Cắt cố định + overlap 10%.',how:'Giống F (500 ký tự mỗi đoạn), nhưng mỗi đoạn lặp lại 50 ký tự cuối của đoạn trước, để câu nằm ở ranh giới vẫn có cơ hội xuất hiện trọn trong đoạn kế.',why:'Overlap cứu được một phần các câu bị cắt ở ranh giới, nên Hit@3 tăng so với F (bge dev 6→8) và số lỗi evidence_split giảm. Nhưng 50 ký tự là quá ngắn so với một khoản luật dài, và đoạn vẫn bắt đầu giữa chữ (coherence 0,1/2). Số chunk nhiều nhất (2283), đắt nhất khi lưu.'},
@@ -79,13 +97,7 @@ const EXPLAIN={
 };
 const qm=k=>`<button class="qm" data-k="${k}" title="Kỹ thuật ${k} là gì?">?</button>`;
 function nums(k){if(!D)return '';return D.models.filter(m=>D.retrieval[m.key]).map(m=>{const x=D.retrieval[m.key][k]||{};const d=x.dev,t=x.test;return `<tr><td>${esc(m.name)}</td><td class="num">${d?d.hit1+'/'+d.n:'-'}</td><td class="num">${d?d.hit3+'/'+d.n:'-'}</td><td class="num">${t?t.hit3+'/'+t.n:'-'}</td></tr>`}).join('')}
-function openQ(k){const e=EXPLAIN[k],s=D.strategies.find(x=>x.key===k),M=D.manual_bge[k]||{};
- $('#mbox').innerHTML=`<button class="close" onclick="document.getElementById('modal').classList.remove('show')">Đóng</button><h3>${k} · ${esc(s.name)}</h3><div class="small">${esc(JSON.stringify(s.config))}</div>
- <h4>Là gì</h4><p>${e.what}</p><h4>Chạy thế nào</h4><p>${e.how}</p><h4>Vì sao ra kết quả hiện tại</h4><p>${e.why}</p>
- <h4>Kết quả hiện tại</h4><table><tr><th>Model</th><th>Dev Hit@1</th><th>Dev Evidence Hit@3</th><th>Test Evidence Hit@3</th></tr>${nums(k)}</table>
- <p class="small">Chấm tay (bge): coherence ${M.coherence_mean??'-'}/2 · metadata đủ & đúng ${M.metadata_ok}/${M.metadata_n} · grounding ${M.grounding_mean??'-'}/2.</p>`;
- $('#modal').classList.add('show')}
-document.addEventListener('click',e=>{const b=e.target.closest('.qm');if(b){openQ(b.dataset.k)}else if(e.target.id==='modal'){$('#modal').classList.remove('show')}});
+document.addEventListener('click',e=>{const b=e.target.closest('.qm');if(b){openQ(b.dataset.k,b.dataset.m)}else if(e.target.id==='modal'){$('#modal').classList.remove('show')}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').classList.remove('show')});
 function heat(n,N){if(!N)return '';const p=n/N;return `background:rgba(31,107,74,${(0.08+p*0.55).toFixed(2)});${p>0.6?'color:#fff;':''}`}
 function cell(v,k){if(!v)return '<td class="num">-</td>';return `<td class="num" style="${heat(v[k],v.n)}">${v[k]}/${v.n}</td>`}
@@ -112,34 +124,132 @@ function renderRes(){
 }
 async function traces(model,s){const k=model+'/'+s;if(!TR[k]){const t=await (await fetch(`../starter/results/traces/${model}/traces_${s}.jsonl`)).text();TR[k]=Object.fromEntries(t.trim().split('\n').map(l=>{const o=JSON.parse(l);return [o.id,o]}))}return TR[k]}
 function mark(text,ev){const t=esc(text);const e=esc(ev);const i=t.toLowerCase().indexOf(e.toLowerCase().slice(0,40));return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+e.length)+'</mark>'+t.slice(i+e.length)}
+// ---------- So sánh câu hỏi: deck (3 models side by side, zoom/pan) ----------
+const COL={F:'#7a7f87',A:'#c98a1b',D:'#2f7ed8',B:'#1f8a5b',S:'#8e5bd0',L:'#d1495b',C:'#138a8a'};
+const MK=['bge','minilm','gemma'];
+const ES={};let CQ=null,SEL=null,VIEW={x:0,y:0,s:1};
+const P={rank:0,cos:1,ang:2,st:3,doc:4,pg:5,where:6,txt:7,len:8,llm:9,hdr:10};
+const mname=k=>{const m=D.models.find(x=>x.key===k);return m?m.name.split('/').pop():k};
+const sname=k=>D.strategies.find(x=>x.key===k).name;
+const tag=k=>`<span class="stag" style="background:${COL[k]}">${k}</span>`;
+const locp=p=>`${p[P.doc]} tr.${p[P.pg]}${p[P.where]?' · '+p[P.where]:''}`;
+const f3=x=>(+x).toFixed(3);
+const l2=c=>Math.sqrt(Math.max(0,2-2*c));
+async function esq(q){if(!ES[q])ES[q]=await (await fetch(`../starter/results/embspace/${q}.json`)).json();return ES[q]}
+function info(E){ // E = data for one model+strategy
+ const pts=[...E.pts].sort((a,b)=>a[P.rank]-b[P.rank]);
+ const ev=pts.find(p=>p[P.st]===2)||null,part=pts.find(p=>p[P.st]===1)||null;
+ return {pts,ev,part,top:pts.slice(0,3),n:E.n,filter:E.filter,h1:!!ev&&ev[P.rank]===1,h3:!!ev&&ev[P.rank]<=3}}
+function ranking(Em){ // order strategies for one model; ties (same chunk rank+cos) share a place
+ const rows=D.strategies.map(s=>({k:s.key,...info(Em[s.key])}));
+ rows.sort((a,b)=>(a.ev?a.ev[P.rank]:1e9)-(b.ev?b.ev[P.rank]:1e9)||(b.ev?b.ev[P.cos]:0)-(a.ev?a.ev[P.cos]:0));
+ let pl=0,prev=null;for(const r of rows){const key=r.ev?r.ev[P.rank]+'|'+f3(r.ev[P.cos]):'none';if(key!==prev||!r.ev)pl++;prev=key;r.place=pl}
+ return rows}
 function renderCmp(){
- $('#cmp').innerHTML=`<div class="panel"><div class="row"><select id="cq">${Q.map(q=>`<option value="${q.id}">${q.id} [${q.split}] ${esc(q.question.slice(0,90))}</option>`).join('')}</select>
- <select id="cm">${D.models.filter(m=>D.retrieval[m.key]).map(m=>`<option value="${m.key}">${esc(m.name)}</option>`).join('')}</select></div><div id="cbody"></div></div>`;
- $('#cq').onchange=$('#cm').onchange=showCmp;showCmp();
+ $('#cmp').innerHTML=`<div class="panel deckbar"><div class="row" style="margin:0"><select id="cq">${Q.map(q=>`<option value="${q.id}">${q.id} [${q.split}] ${esc(q.question.slice(0,90))}</option>`).join('')}</select>
+ <span class="zb"><button id="zo" title="Thu nhỏ">−</button><button id="zf">Vừa khung</button><button id="zi" title="Phóng to">+</button></span>
+ <span class="small">Kéo để di chuyển · cuộn chuột (hoặc Ctrl/⌘ + cuộn) để phóng to/thu nhỏ · bấm một kỹ thuật để xem nó trên cả 3 model · hạng xếp theo vị trí của chunk chứa trọn bằng chứng trong toàn bộ index (kể cả ngoài top-3), cùng vị trí thì cos cao hơn đứng trước · đường nối cùng màu cho thấy hạng của một kỹ thuật đổi thế nào giữa các model</span></div>
+ <div class="legend" style="margin-top:8px">${D.strategies.map(s=>`<span class="lg">${tag(s.key)} ${esc(s.name)}</span>`).join('')}</div></div>
+ <div id="cqinfo"></div><div id="vp" class="vp"><div id="stage"></div></div>`;
+ $('#cq').onchange=()=>showCmp($('#cq').value);
+ $('#zi').onclick=()=>zoomAt(1.2);$('#zo').onclick=()=>zoomAt(1/1.2);$('#zf').onclick=fit;
+ const vp=$('#vp');let drag=null;
+ vp.addEventListener('pointerdown',e=>{if(e.target.closest('button,.crow,circle,.pt'))return;drag={x:e.clientX,y:e.clientY,vx:VIEW.x,vy:VIEW.y};vp.setPointerCapture(e.pointerId);vp.classList.add('grab')});
+ vp.addEventListener('pointermove',e=>{if(!drag)return;VIEW.x=drag.vx+e.clientX-drag.x;VIEW.y=drag.vy+e.clientY-drag.y;apply()});
+ vp.addEventListener('pointerup',()=>{drag=null;vp.classList.remove('grab')});
+ vp.addEventListener('wheel',e=>{e.preventDefault();const r=vp.getBoundingClientRect();zoomAt(Math.exp(-e.deltaY*0.0015),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+ showCmp(Q[0].id);
 }
-const onGold=(x,q)=>x.document_id===q.gold_source_id&&+x.page<=q.gold_page&&q.gold_page<=+(x.page_end||x.page);
-function kind(x,q){return x.is_hit?'ok':onGold(x,q)?'part':''}
-function loc(x){const doc=x.document_id.startsWith('gdpr')?'GDPR':'AI Act';const pg=x.page_end&&x.page_end!==x.page?x.page+'–'+x.page_end:x.page;
- const where=x.part==='recital'?'Recital':x.annex&&x.annex!=='None'?'Phụ lục '+x.annex:x.article&&x.article!=='None'?'Điều '+x.article:(x.part||'');return `${doc} · tr.${pg}${where?' · '+where:''}`}
-function snippet(text,ev){const t=String(text);const i=t.toLowerCase().indexOf(String(ev).toLowerCase().slice(0,40));
- if(i<0)return {html:esc(t.length>700?t.slice(0,700)+' …':t),found:false};
- const a=Math.max(0,i-220),b=Math.min(t.length,i+ev.length+220);
- return {html:(a?'… ':'')+esc(t.slice(a,i))+'<mark>'+esc(t.slice(i,i+ev.length))+'</mark>'+esc(t.slice(i+ev.length,b))+(b<t.length?' …':''),found:true}}
-async function showCmp(){
- const q=Q.find(x=>x.id===$('#cq').value),m=$('#cm').value;
- const rows=[];for(const s of D.strategies){const t=(await traces(m,s.key))[q.id];rows.push({s,t,h:t.top3.find(x=>x.is_hit)})}
- rows.sort((a,b)=>(a.h?+a.h.rank:9)-(b.h?+b.h.rank:9)||(b.h?+b.h.score:0)-(a.h?+a.h.score:0));
- let place=0,prev=null;
- for(const r of rows){if(!r.h){r.place=null;continue}const key=r.h.rank+'|'+(+r.h.score).toFixed(4);if(key!==prev)place++;prev=key;r.place=place}
- let h=`<div class="q"><b>${esc(q.question)}</b><div class="small" style="margin-top:4px">Bằng chứng: <b>${q.gold_source_id.startsWith('gdpr')?'GDPR':'AI Act'} trang ${q.gold_page}</b> — “${esc(q.evidence_quote)}”${q.filter?` · lọc <b>part = ${esc(q.filter.part)}</b> (chỉ C dùng lọc)`:''}</div></div>
- <div class="small" style="margin-bottom:8px">Cột xếp theo hạng trên câu này với model này: kỹ thuật lấy được chunk chứa trọn bằng chứng ở vị trí cao hơn trong top-3 đứng trước; cùng vị trí thì điểm tương đồng cao hơn đứng trước; trả về cùng chunk thì chung hạng. Ô viền xanh = chunk chứa trọn câu bằng chứng; ô viền vàng = đúng trang nhưng câu bằng chứng bị cắt.</div><div class="grid">`;
- for(const r of rows){const {s,t}=r;
-  const badge=r.place?`<span class="medal m${Math.min(r.place,3)}" ${r.place>3?'style="background:#9aa3ad"':''}>Hạng ${r.place}</span>`:`<span class="chip no">Trượt</span>`;
-  h+=`<div class="col"><h3><span>${badge} ${s.key} · ${esc(s.name)}${qm(s.key)}</span><span class="small">${r.h?'trúng ở #'+r.h.rank+' · '+(+r.h.score).toFixed(3):''}</span></h3>`;
-  for(const x of t.top3){const k=kind(x,q);h+=`<div class="hit ${k==='ok'?'ok':''}" ${k==='part'?'style="background:#fff6e0;box-shadow:inset 3px 0 0 #d9a400"':''}><div class="meta"><span>#${x.rank}</span><span>${esc(loc(x))}</span><span>điểm ${(+x.score).toFixed(3)}</span></div><div class="txt">${snippet(x.text,q.evidence_quote).html}</div></div>`}
-  h+='</div>'}
- $('#cbody').innerHTML=h+'</div>';
+function apply(){$('#stage').style.transform=`translate(${VIEW.x}px,${VIEW.y}px) scale(${VIEW.s})`}
+function zoomAt(f,cx,cy){const vp=$('#vp');cx??=vp.clientWidth/2;cy??=vp.clientHeight/2;const s=Math.min(3,Math.max(0.2,VIEW.s*f));VIEW.x=cx-(cx-VIEW.x)*s/VIEW.s;VIEW.y=cy-(cy-VIEW.y)*s/VIEW.s;VIEW.s=s;apply()}
+function fit(){const vp=$('#vp'),st=$('#stage');VIEW.s=Math.min(1,(vp.clientWidth-24)/st.offsetWidth);VIEW.x=(vp.clientWidth-st.offsetWidth*VIEW.s)/2;VIEW.y=12;apply()}
+async function showCmp(qid){
+ CQ=Q.find(x=>x.id===qid);const E=await esq(qid);
+ $('#cqinfo').innerHTML=`<div class="q"><b>${esc(CQ.question)}</b><div class="small" style="margin-top:4px">Bằng chứng: <b>${CQ.gold_source_id.startsWith('gdpr')?'GDPR':'AI Act'} trang ${CQ.gold_page}</b> — “${esc(CQ.evidence_quote)}”${CQ.filter?` · lọc <b>part = ${esc(CQ.filter.part)}</b> (chỉ C dùng lọc)`:''}</div></div>`;
+ const R={};MK.forEach(m=>R[m]=ranking(E[m]));
+ if(!SEL)SEL=R.bge[0].k;
+ let h='';
+ MK.forEach((m,i)=>{h+=`<div class="card" style="left:${i*780}px"><div class="ch"><b>${esc(mname(m))}</b><span class="small">${D.models.find(x=>x.key===m).dims} chiều</span></div><div class="rows">`+
+  R[m].map(r=>{const ev=r.ev;return `<div class="crow ${r.k===SEL?'sel':''}" data-k="${r.k}" style="--c:${COL[r.k]}"><span class="pl">${r.place}</span>${tag(r.k)}<span class="nm">${esc(sname(r.k))}</span>
+   <span class="hk ${r.h1?'ok':'no'}">@1 ${r.h1?'✓':'✗'}</span><span class="hk ${r.h3?'ok':'no'}">@3 ${r.h3?'✓':'✗'}</span>
+   <span class="evr">${ev?`bằng chứng ở #${ev[P.rank]} · cos ${f3(ev[P.cos])}`:'không chunk nào chứa trọn bằng chứng'}</span><button class="qm" data-k="${r.k}" data-m="${m}">?</button></div>`}).join('')+
+  `</div><div class="cdet" id="det_${m}"></div></div>`});
+ $('#stage').innerHTML=h+'<svg id="links" class="links"></svg>';
+ $('#stage').querySelectorAll('.crow').forEach(el=>el.onclick=e=>{if(e.target.closest('.qm'))return;SEL=el.dataset.k;showCmp(qid)});
+ MK.forEach(m=>{$('#det_'+m).innerHTML=detail(qid,m,SEL,E,R,600)});
+ // slope lines between models: same colour = same chunking technique
+ const st=$('#stage'),W=st.offsetWidth,H=Math.max(...[...st.querySelectorAll('.card')].map(c=>c.offsetHeight)),svg=$('#links');st.style.height=H+'px';svg.setAttribute('width',W);svg.setAttribute('height',H);
+ const pos=(m,k)=>{const el=st.querySelector(`#det_${m}`).parentElement.querySelector(`.crow[data-k="${k}"]`),card=el.closest('.card');return {y:card.offsetTop+el.offsetTop+el.offsetHeight/2,x0:card.offsetLeft,x1:card.offsetLeft+card.offsetWidth}};
+ let s='';for(let i=0;i<2;i++)for(const k of Object.keys(COL)){const a=pos(MK[i],k),b=pos(MK[i+1],k);const on=k===SEL;
+  s+=`<path d="M${a.x1} ${a.y} C${a.x1+70} ${a.y},${b.x0-70} ${b.y},${b.x0} ${b.y}" stroke="${COL[k]}" stroke-width="${on?6:3}" fill="none" opacity="${on?1:.45}"/>`}
+ svg.innerHTML=s;
+ if(!showCmp.done&&$('#vp').offsetWidth){showCmp.done=1;fit()}
 }
+function detail(qid,m,k,E,R,size){
+ const I=info(E[m][k]);
+ return `<div class="dh">${tag(k)} <b>${esc(sname(k))}</b> trên ${esc(mname(m))}</div>${plot(I,k,size)}<div class="why">${why(qid,m,k,E,R)}</div>
+ <div class="tops">${I.top.map(p=>`<div class="tp ${p[P.st]===2?'ok':p[P.st]===1?'part':''}"><div class="meta"><b>#${p[P.rank]}</b><span>${esc(locp(p))}</span><span>cos ${f3(p[P.cos])} · d=1−cos ${f3(1-p[P.cos])} · L2 ${f3(l2(p[P.cos]))}</span><span>${p[P.len]} ký tự</span></div><div class="txt">${hl(p[P.txt])}</div></div>`).join('')}</div>`}
+function hl(t){const e=CQ.evidence_quote.toLowerCase().slice(0,30);const i=t.toLowerCase().indexOf(e);return i<0?esc(t)+'…':esc(t.slice(0,i))+'<mark>'+esc(t.slice(i))+'</mark>…'}
+function plot(I,k,size){
+ const W=size,H=size*0.8,cx=W/2,cy=H/2,R=Math.min(cx,cy)-30;
+ const ds=I.pts.map(p=>1-p[P.cos]);const d0=Math.max(0,Math.min(...ds)-0.02),d1=Math.max(...ds);
+ const rad=d=>22+(R-22)*Math.pow((d-d0)/((d1-d0)||1),0.6);
+ const xy=p=>{const r=rad(1-p[P.cos]);return [cx+r*Math.cos(p[P.ang]),cy+r*Math.sin(p[P.ang])]};
+ let s=`<svg viewBox="0 0 ${W} ${H}" class="esp">`;
+ for(const d of [d0+(d1-d0)*0.1,d0+(d1-d0)*0.4,d1]){s+=`<circle cx="${cx}" cy="${cy}" r="${rad(d)}" fill="none" stroke="#e3e6ea"/><text x="${cx+3}" y="${cy-rad(d)-3}" class="rl">cos ${f3(1-d)}</text>`}
+ const ev=I.ev;
+ for(const p of I.pts){if(p[P.rank]<=3||p===ev)continue;const [x,y]=xy(p);
+  s+=`<circle class="pt" cx="${x}" cy="${y}" r="${p[P.st]?5:3.2}" fill="${p[P.st]===1?'#e2a400':'#b7bcc3'}" ${p[P.st]?'stroke="#7a5a00"':''}><title>#${p[P.rank]} · ${locp(p)} · cos ${f3(p[P.cos])}${p[P.st]===1?' · chỉ chứa một phần bằng chứng':''}\n${p[P.txt].slice(0,160)}…</title></circle>`}
+ const lines=[...I.top];if(ev&&ev[P.rank]>3)lines.push(ev);
+ for(const p of lines){const [x,y]=xy(p);const isEv=p[P.st]===2,top=p[P.rank]<=3;
+  s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${top?COL[k]:'#1f8a5b'}" stroke-width="${top?2:1.6}" ${top?'':'stroke-dasharray="5 4"'}/>`;
+  s+=`<circle class="pt" cx="${x}" cy="${y}" r="${top?10:8}" fill="${top?COL[k]:'#fff'}" stroke="${isEv?'#0f6b3a':'#fff'}" stroke-width="${isEv?3.5:1.5}"><title>#${p[P.rank]} · ${locp(p)}\ncos ${f3(p[P.cos])} · d=1−cos ${f3(1-p[P.cos])} · L2 ${f3(l2(p[P.cos]))}${isEv?'\nchứa trọn câu bằng chứng':''}\n${p[P.txt].slice(0,160)}…</title></circle>`;
+  if(top)s+=`<text x="${x}" y="${y+4}" class="pn">${p[P.rank]}</text>`;
+  if(!top)s+=`<text x="${x+12}" y="${y+4}" class="pl1">bằng chứng #${p[P.rank]}</text>`}
+ const tbl=`<table class="mini"><tr><th></th><th>Chunk</th><th>cos</th><th>d = 1 − cos</th><th>L2</th></tr>${lines.map(p=>`<tr><td><span class="stag" style="background:${p[P.rank]<=3?COL[k]:'#0f6b3a'}">${p[P.rank]<=3?'#'+p[P.rank]:'bc #'+p[P.rank]}</span></td><td>${esc(locp(p))}${p[P.st]===2?' ✓ chứa trọn bằng chứng':p[P.st]===1?' (một phần bằng chứng)':''}</td><td>${f3(p[P.cos])}</td><td>${f3(1-p[P.cos])}</td><td>${f3(l2(p[P.cos]))}</td></tr>`).join('')}</table>`;
+ s+=`<path d="${star(cx,cy,11,5)}" fill="#1d2321"/><text x="${cx}" y="${cy+24}" text-anchor="middle" class="pl1">câu hỏi</text></svg>`;
+ return s+tbl+`<div class="small">Tâm = câu hỏi. Khoảng cách tới tâm = khoảng cách cosine thật d = 1 − cos (vòng tròn ghi giá trị cos; trục bán kính bắt đầu từ d=${f3(d0)} để tách các điểm gần). Góc chỉ là hình chiếu PCA nên hai điểm cạnh nhau về góc chưa chắc giống nhau. Màu: chấm đặc = top-3, viền xanh đậm = chunk chứa trọn câu bằng chứng, chấm vàng = chunk chỉ chứa một phần, chấm xám = 40 chunk gần nhất khác. L2 = √(2 − 2·cos) vì vector đã chuẩn hoá.</div>`}
+function star(x,y,r,n){let d='';for(let i=0;i<2*n;i++){const a=Math.PI*i/n-Math.PI/2,rr=i%2?r*0.45:r;d+=(i?'L':'M')+(x+rr*Math.cos(a)).toFixed(1)+' '+(y+rr*Math.sin(a)).toFixed(1)}return d+'Z'}
+function why(qid,m,k,E,R){
+ const I=info(E[m][k]),rows=R[m],me=rows.find(r=>r.k===k),ev=I.ev,t1=I.top[0],t2=I.top[1],t3=I.top[2];
+ const out=[];
+ const same=rows.filter(r=>r.place===me.place&&r.k!==k).map(r=>r.k);
+ out.push(`<p><b>Hạng ${me.place}</b> trong 7 kỹ thuật với câu ${qid} trên ${esc(mname(m))}${same.length?` (chung hạng với ${same.join(', ')}: trả về cùng chunk)`:''}. Hit@1 ${I.h1?'✓':'✗'}, Hit@3 ${I.h3?'✓':'✗'}.</p>`);
+ let r='';
+ if(!ev){r=`Không chunk nào của kỹ thuật này chứa trọn câu bằng chứng: ranh giới chunk cắt đôi câu, nên dù tìm đúng trang vẫn tính là trượt.`+(I.part?` Mảnh chứa một phần bằng chứng (${esc(locp(I.part))}) đứng #${I.part[P.rank]}, cos ${f3(I.part[P.cos])}.`:'')}
+ else if(ev[P.rank]===1){r=`Chunk chứa trọn câu bằng chứng (${esc(locp(ev))}, ${ev[P.len]} ký tự) là điểm gần câu hỏi nhất: cos ${f3(ev[P.cos])}, hơn chunk #2 (${esc(locp(t2))}) ${f3(ev[P.cos]-t2[P.cos])}.`}
+ else{const gap=t1[P.cos]-ev[P.cos];
+  r=`Chunk chứa bằng chứng (${esc(locp(ev))}) đứng #${ev[P.rank]}/${I.n} với cos ${f3(ev[P.cos])}; chunk #1 là ${esc(locp(t1))} (cos ${f3(t1[P.cos])}), gần câu hỏi hơn ${f3(gap)}.`;
+  if(t1[P.st]===1)r+=` Chunk #1 nằm đúng trang nhưng chỉ chứa một phần câu bằng chứng (bị ranh giới cắt).`;
+  else if(t1[P.where]==='Recital'&&ev[P.where]!=='Recital')r+=` Chunk #1 là recital nói cùng chủ đề với Điều chứa đáp án, nên vector gần câu hỏi hơn dù không chứa câu cần tìm.`;
+  else if(t1[P.doc]!==ev[P.doc])r+=` Chunk #1 thuộc văn bản khác (${t1[P.doc]}): câu hỏi dùng từ ngữ gần với đoạn đó hơn.`;
+  if(ev[P.rank]>3)r+=` Để vào top-3 cần vượt chunk #3 (cos ${f3(t3[P.cos])}), còn thiếu ${f3(t3[P.cos]-ev[P.cos])}.`}
+ out.push(`<p><b>Vì sao:</b> ${r}</p>`);
+ const notes=[];
+ if(ev){if(ev[P.len]>=950)notes.push(`chunk bằng chứng dài ${ev[P.len]} ký tự: câu cần tìm chỉ là một phần nhỏ, các ý khác làm "loãng" vector`);
+  else if(ev[P.len]<=380)notes.push(`chunk bằng chứng ngắn (${ev[P.len]} ký tự): ít ngữ cảnh nhưng vector tập trung vào đúng câu`);
+  if(ev[P.hdr])notes.push(`chunk có header ngữ cảnh "[${ev[P.doc]} | … | ${esc(ev[P.where])} …]" nên vector mang cả tên Điều/phần`);
+  if(k==='L')notes.push(ev[P.llm]?'trang này nằm trong 30 trang mẫu do Haiku cắt':'trang này ngoài mẫu LLM nên được cắt bằng D')}
+ if(k==='C'){const b=info(E[m].B);notes.push(I.filter?`lọc part = ${I.filter} chỉ còn ${I.n} chunk; B (không lọc) đặt bằng chứng ở ${b.ev?'#'+b.ev[P.rank]:'không đâu'}, C ở ${ev?'#'+ev[P.rank]:'không đâu'}`:'câu này không có lọc nên C cho kết quả giống hệt B')}
+ if(notes.length)out.push(`<p><b>Đặc điểm chunk:</b> ${notes.join('; ')}.</p>`);
+ // vs other techniques on this model
+ const best=rows[0];
+ out.push(`<p><b>So với kỹ thuật khác (cùng ${esc(mname(m))}):</b></p><table class="mini"><tr><th>Hạng</th><th>Kỹ thuật</th><th>Bằng chứng ở</th><th>cos</th><th>Độ dài chunk</th></tr>${rows.map(x=>`<tr class="${x.k===k?'me':''}"><td>${x.place}</td><td>${tag(x.k)} ${esc(sname(x.k))}</td><td>${x.ev?'#'+x.ev[P.rank]:x.part?'chỉ có mảnh, #'+x.part[P.rank]:'—'}</td><td>${x.ev?f3(x.ev[P.cos]):'—'}</td><td>${x.ev?x.ev[P.len]:'—'}</td></tr>`).join('')}</table>`);
+ if(best.k!==k&&best.ev){const b=best.ev;out.push(`<p>Kỹ thuật đứng đầu (${best.k}) cắt bằng chứng thành chunk ${b[P.len]} ký tự${b[P.hdr]?' có header':''}, cos ${f3(b[P.cos])}${ev?`; ${k} có cos ${f3(ev[P.cos])} (kém ${f3(b[P.cos]-ev[P.cos])})`:''}.</p>`)}
+ // vs other models, same technique
+ out.push(`<p><b>Cùng kỹ thuật ${k} trên model khác:</b> ${MK.map(mm=>{const x=R[mm].find(y=>y.k===k);return `${esc(mname(mm))}: hạng ${x.place}, ${x.ev?'bằng chứng #'+x.ev[P.rank]+' (cos '+f3(x.ev[P.cos])+')':'không có chunk chứa trọn'}`}).join(' · ')}.</p>`);
+ return out.join('')}
+async function openQ(k,m){
+ const qid=$('#cq')?.value||Q[0].id;m=m||'bge';CQ=Q.find(x=>x.id===qid);const E=await esq(qid);const R={};MK.forEach(mm=>R[mm]=ranking(E[mm]));
+ const e=EXPLAIN[k],s=D.strategies.find(x=>x.key===k);
+ $('#mbox').innerHTML=`<button class="close" onclick="document.getElementById('modal').classList.remove('show')">Đóng</button><h3>${tag(k)} ${esc(s.name)}</h3>
+ <div class="row" style="margin:8px 0"><span class="small">Câu ${qid}: ${esc(CQ.question)}</span></div>
+ <div class="row" style="margin:0 0 8px">${MK.map(mm=>`<button class="mbtn ${mm===m?'on':''}" onclick="openQ('${k}','${mm}')">${esc(mname(mm))}</button>`).join('')}</div>
+ <h4>Là gì · chạy thế nào</h4><p>${e.what} ${e.how}</p>
+ <h4>Kết quả trên câu này, model này</h4>${why(qid,m,k,E,R)}
+ <h4>Không gian embedding của câu này</h4>${plot(info(E[m][k]),k,640)}
+ <h4>Toàn bộ benchmark</h4><table><tr><th>Model</th><th>Dev Hit@1</th><th>Dev Evidence Hit@3</th><th>Test Evidence Hit@3</th></tr>${nums(k)}</table>`;
+ $('#modal').classList.add('show')}
 function renderLive(){
  $('#live').innerHTML=`<div class="panel"><div class="row"><input type="text" id="lq" placeholder="Hỏi về AI Act hoặc GDPR, ví dụ: How long do I have to report a data breach?">
  <select id="lm">${D.models.map(m=>`<option value="${m.key}">${esc(m.name)}</option>`).join('')}</select>

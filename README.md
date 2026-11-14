@@ -45,6 +45,7 @@ python -m src.run llm              # Haiku chọn điểm cắt trên 30 trang m
 python -m src.run ingest           # 6 chunking × 3 model -> pgvector; nạp lại lần 2 để kiểm tra không nhân đôi
 python -m src.run eval             # top-3 cho 24 câu × 7 cấu hình × 3 model -> results/traces/<model>/
 python -m src.report               # results/summary.md + results/report_data.json
+python -m src.embspace             # results/embspace/<question>.json (embedding-space view in the demo)
 python -m src.demo_server          # http://127.0.0.1:8770/demo/index.html
 ```
 
@@ -61,7 +62,7 @@ Trên máy khác chỉ cần tạo `.venv` bình thường và bỏ dòng `HF_HO
 ```text
 STUDENT.md · README.md · configs/strategies.json · data/manifest.json
 benchmark/questions.jsonl (24 câu, 18 dev / 6 test) · benchmark/README.md (cách chia, tiêu chí chọn chốt trước)
-starter/src/      ingestion, chunking (F A D B S L), llm_chunker, embeddings, store (pgvector), evaluation, run, report, demo_server
+starter/src/      ingestion, chunking (F A D B S L), llm_chunker, embeddings, store (pgvector), evaluation, run, report, embspace, demo_server
 starter/data/processed/  pages.jsonl (văn bản đã chuẩn hoá theo trang), llm_boundaries.json
 starter/results/  corpus_stats, extraction_errors, ingest_report, summary.json/.md, traces/<model>/traces_<S>.jsonl,
                   manual/ (coherence_labels.csv, metadata_audit_test.csv, grounding_labels_test.csv)
